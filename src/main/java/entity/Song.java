@@ -1,4 +1,4 @@
-package com.project.core.entity;
+package entity;
 
 /**
  * Entity representing a single song track.

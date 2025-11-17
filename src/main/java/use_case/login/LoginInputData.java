@@ -1,1 +1,4 @@
-// Request data transfer object
+package use_case.login;
+
+public class LoginInputData {
+}

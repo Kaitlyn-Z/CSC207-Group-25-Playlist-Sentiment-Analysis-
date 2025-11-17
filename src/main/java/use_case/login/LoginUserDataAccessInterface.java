@@ -1,1 +1,4 @@
-// Data Access Interface
+package use_case.login;
+
+public interface LoginUserDataAccessInterface {
+}

@@ -1,38 +1,43 @@
 package data_access;
 
-import entity.UserFactory;
-import use_case.logout.LogoutUserDataAccessInterface;
-import use_case.login.LoginUserDataAccessInterface;
+import entity.User;
 
-public class DBUserDataAccessObject implements LoginUserDataAccessInterface, LogoutUserDataAccessInterface {
+public class DBUserDataAccessObject implements UserDataAccessInterface {
 
-    /*
-    necessity & variable according to the needs of API
-    private static final int SUCCESS_CODE = 200;
-    private static final String STATUS_CODE_LABEL = "status_code";
-    private static final String CONTENT_TYPE_LABEL = "Content-Type";
-    private static final String CONTENT_TYPE_JSON = "application/json";
+    // whatever fields/constructors already exist
 
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
-    private static final String MESSAGE = "message";*/
-    private final UserFactory userFactory;
-
-    public DBUserDataAccessObject(UserFactory userFactory) {
-        this.userFactory = userFactory;
+    @Override
+    public boolean existsBySpotifyId(String spotifyId) {
+        // implement using your DB logic
+        // (or stub for now)
+        return false;
     }
 
-    //all concrete methods from use case data access interface corresponding to user, like: login, determine if the user exists or not...
-    //Based on how Spotify API works
-    /*Example:
     @Override
-    public boolean existsByName(String username) {
-    } if login user data access interface has an abstract method called existsByName
-     */
+    public User getBySpotifyId(String spotifyId) {
+        // implement using your DB logic
+        return null;
+    }
 
+    @Override
+    public void save(User user) {
+        // implement DB insert/update
+    }
 
+    private User currentUser;
 
+    @Override
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
+    @Override
+    public User getCurrentUser() {
+        return currentUser;
+    }
 
-
+    @Override
+    public void clearCurrentUser() {
+        this.currentUser = null;
+    }
 }

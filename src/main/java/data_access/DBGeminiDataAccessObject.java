@@ -10,7 +10,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -154,14 +153,12 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
             String sentimentWord = (String) sentimentData.getOrDefault("sentimentWord", "Undetermined");
             String sentimentExplanation = (String) sentimentData.getOrDefault("sentimentExplanation", "No explanation provided.");
 
-            // Step 4: Create and return the Entity, using 0.0 and emptyMap for the old fields
             return new SentimentResult(
                     sentimentWord,
                     sentimentExplanation
             );
 
         } catch (Exception e) {
-            // Catch parsing errors (e.g., API didn't return perfect JSON)
             throw new IOException("Failed to parse Gemini API response. Check API key and response format. Error: " + e.getMessage(), e);
         }
     }

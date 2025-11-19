@@ -32,9 +32,7 @@ public class AnalysisPresenter implements AnalyzePlaylistOutputBoundary {
             // that the AnalysisState expects using the primitive getters.
             SentimentResult result = new SentimentResult(
                     outputData.getOverallCategory(),
-                    outputData.getNumericalScore(),
-                    outputData.getSummaryText(),
-                    outputData.getSentimentBreakdown()
+                    outputData.getSummaryText()
             );
 
             state.setLoading(false);

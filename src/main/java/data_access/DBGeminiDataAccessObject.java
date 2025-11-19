@@ -16,12 +16,12 @@ import java.util.Map;
 /**
  * Concrete implementation of the SentimentDataAccessInterface that uses the Gemini API
  * to perform sentiment analysis on a block of lyrics.
- * * NOTE: This class requires Java 11+ for the HttpClient and the Gson library for JSON parsing.
+ * NOTE: This class uses the built-in Java 11+ HttpClient and the Gson library for JSON parsing.
+ * The analysis provides a descriptive "sentiment word" and "explanation."
  */
 public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
-    // IMPORTANT: In a real application, the API key should be loaded from a secure source (e.g., environment variable).
-    // For demonstration, please replace this with your actual Gemini API Key.
+    // IMPORTANT: For demonstration. In a real application, load this from a secure environment variable.
     private static final String API_KEY = ""; // REPLACE WITH YOUR ACTUAL KEY
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
     private final HttpClient httpClient;
@@ -34,21 +34,20 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
     /**
      * Constructs the system instruction that forces the Gemini model to respond
-     * with a JSON object matching the required schema.
+     * with a JSON object matching the required schema for Sentiment analysis.
      */
     private String createSystemInstruction() {
-        return "You are a professional music sentiment analysis engine. Analyze the following combined lyrics from a playlist. " +
+        return "You are a professional music analysis engine. Analyze the following combined lyrics from a playlist. " +
                 "Your response MUST be a single JSON object that adheres strictly to the following schema. " +
                 "Do not include any other text or explanation outside of the JSON object. " +
-                "The sentiment score is a double between -1.0 (most negative) and 1.0 (most positive). " +
-                "The overall category must be one of: 'Highly Positive', 'Positive', 'Neutral', 'Negative', 'Highly Negative'.";
+                "Identify the single most descriptive **sentiment word** or two that capture the overall feel of the lyrics.";
     }
 
     /**
      * Calls the Gemini API to analyze the sentiment of the provided lyrics.
      *
      * @param combinedLyrics A single String containing the concatenated lyrics.
-     * @return A SentimentResult entity.
+     * @return A SentimentResult entity (now representing descriptive Sentiment Analysis).
      * @throws IOException If a network or API communication error occurs, or if parsing fails.
      */
     @Override
@@ -59,7 +58,7 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
         // --- 1. Build the API Request Payload ---
         String systemInstruction = createSystemInstruction();
-        String userQuery = "Analyze the sentiment of this playlist's lyrics: \n\n--- LYRICS ---\n\n" + combinedLyrics;
+        String userQuery = "Analyze the sentiment of this playlist's lyrics and explain your finding: \n\n--- LYRICS ---\n\n" + combinedLyrics;
 
         // Escape quotes and newlines for JSON string formatting
         String escapedUserQuery = userQuery.replace("\"", "\\\"").replace("\n", "\\n");
@@ -76,15 +75,10 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
                     "responseSchema": {
                         "type": "OBJECT",
                         "properties": {
-                            "overallCategory": { "type": "STRING" },
-                            "summaryText": { "type": "STRING" },
-                            "numericalScore": { "type": "NUMBER" },
-                            "sentimentBreakdown": {
-                                "type": "OBJECT",
-                                "description": "Breakdown of sentiment categories and their scores (e.g., 'joy': 0.7)",
-                                "additionalProperties": { "type": "NUMBER" }
-                            }
-                        }
+                            "sentimentWord": { "type": "STRING", "description": "A single word or two describing the sentiment." },
+                            "sentimentExplanation": { "type": "STRING", "description": "A short paragraph explaining the sentiment." }
+                        },
+                        "required": ["sentimentWord", "sentimentExplanation"]
                     }
                 }
             }
@@ -119,9 +113,9 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
     /**
      * Parses the complex nested JSON response from the Gemini API and extracts the
-     * structured sentiment JSON, then converts it into a SentimentResult entity.
+     * structured Sentiment JSON, then converts it into a SentimentResult entity.
      * @param jsonResponse The raw JSON string from the API.
-     * @return A SentimentResult entity.
+     * @return A SentimentResult entity (now focused on descriptive Sentiment).
      * @throws IOException If the JSON structure is unexpected or parsing fails.
      */
     private SentimentResult parseGeminiResponse(String jsonResponse) throws IOException {
@@ -144,28 +138,15 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
                 throw new IOException("Gemini returned empty or null text content.");
             }
 
-            // Step 3: Convert the generated JSON string to the final entity structure
+            // Step 3: Convert the generated JSON string to the final sentiment structure
             Map<String, Object> sentimentData = gson.fromJson(sentimentJsonString, new TypeToken<Map<String, Object>>() {}.getType());
 
-            // Extract fields and ensure proper casting
-            String overallCategory = (String) sentimentData.getOrDefault("overallCategory", "Neutral");
-            String summaryText = (String) sentimentData.getOrDefault("summaryText", "No summary provided.");
+            // Extract new Sentiment fields: sentimentWord and sentimentExplanation
+            String sentimentWord = (String) sentimentData.getOrDefault("sentimentWord", "Undetermined");
+            String sentimentExplanation = (String) sentimentData.getOrDefault("sentimentExplanation", "No explanation provided.");
 
-            // Numerical values come as Double from Gson, use Number to handle potential floating point issues.
-            double numericalScore = ((Number) sentimentData.getOrDefault("numericalScore", 0.0)).doubleValue();
-
-            // Cast breakdown to the correct type
-            Map<String, Double> breakdownMap;
-            Object breakdownObj = sentimentData.getOrDefault("sentimentBreakdown", Collections.emptyMap());
-
-            if (breakdownObj instanceof Map) {
-                breakdownMap = (Map<String, Double>) breakdownObj;
-            } else {
-                breakdownMap = Collections.emptyMap();
-            }
-
-            // Step 4: Create and return the immutable Entity
-            return new SentimentResult(overallCategory, numericalScore, summaryText, breakdownMap);
+            // Step 4: Create and return the Entity, using 0.0 and emptyMap for the old fields
+            return new SentimentResult(sentimentWord, sentimentExplanation);
 
         } catch (Exception e) {
             // Catch parsing errors (e.g., API didn't return perfect JSON)

@@ -1,10 +1,15 @@
 package data_access;
 
 import entity.User;
+import entity.UserFactory;
 
 public class DBUserDataAccessObject implements UserDataAccessInterface {
 
     // whatever fields/constructors already exist
+
+    private final UserFactory userFactory;
+
+    public DBUserDataAccessObject(UserFactory userFactory) { this.userFactory = userFactory; }
 
     @Override
     public boolean existsBySpotifyId(String spotifyId) {

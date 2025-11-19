@@ -38,7 +38,6 @@ import javax.swing.*;  //JFrame...
 import java.awt.*;  //Color...
 
 
-
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
@@ -80,7 +79,7 @@ public class AppBuilder {
     public AppBuilder addAnalysisView() {
         analysisViewModel = new AnalysisViewModel();
         analysisView = new AnalysisView(analysisViewModel);
-        cardPanel.add(analysisView, analysisView.getViewName);
+        cardPanel.add(analysisView, analysisView.getViewName());
         return this;
     }
 

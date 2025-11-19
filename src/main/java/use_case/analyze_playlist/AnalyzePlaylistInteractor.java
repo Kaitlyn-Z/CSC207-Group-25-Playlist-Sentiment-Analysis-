@@ -42,14 +42,9 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
         try {
             SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
 
-            // Prepare success view data
-            // FIX: The AnalyzePlaylistOutputData constructor requires 4 primitive fields,
-            // which are extracted here from the SentimentResult entity using its getters.
             AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(
                     result.getOverallCategory(),
-                    result.getNumericalScore(),
-                    result.getSummaryText(),
-                    result.getSentimentBreakdown()
+                    result.getSummaryText()
             );
 
             analyzePlaylistPresenter.prepareSuccessView(outputData);

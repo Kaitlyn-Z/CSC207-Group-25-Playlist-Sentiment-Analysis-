@@ -1,17 +1,13 @@
 package view;
 
-import data_access.DBGeminiDataAccessObject;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisState;
 import interface_adapter.analysis.AnalysisViewModel;
-import interface_adapter.analysis.AnalysisPresenter;
-import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
-import use_case.analyze_playlist.AnalyzePlaylistInteractor;
-import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
-import use_case.analyze_playlist.SentimentDataAccessInterface; // <-- NEW IMPORT
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -19,9 +15,9 @@ import java.beans.PropertyChangeListener;
  * The main view for viewing the Lyric Sentiment Analysis Summary.
  * It observes the AnalysisViewModel for state changes and updates the UI accordingly.
  */
-public class AnalysisView extends JPanel implements PropertyChangeListener {
+public class AnalysisView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    public final String viewName = "analysis";
+    public static final String VIEW_NAME = "analysis";
 
     // Components
     private final JTextArea lyricsArea = new JTextArea(10, 40);
@@ -29,11 +25,12 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
     private final SentimentPanel sentimentPanel = new SentimentPanel();
 
     // Interface Adapter dependencies
-    private final AnalysisController analysisController;
+    // Controller is non-final and set later by AppBuilder
+    private AnalysisController analysisController;
     private final AnalysisViewModel analysisViewModel;
 
-    public AnalysisView(AnalysisController analysisController, AnalysisViewModel analysisViewModel) {
-        this.analysisController = analysisController;
+    public AnalysisView(AnalysisViewModel analysisViewModel) {
+        // NOTE: The controller is NOT set here. It's set via the setter by AppBuilder later.
         this.analysisViewModel = analysisViewModel;
         this.analysisViewModel.addPropertyChangeListener(this);
 
@@ -56,14 +53,8 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(analyzeButton);
         inputPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Attach action listener
-        analyzeButton.addActionListener(e -> {
-            if (e.getSource().equals(analyzeButton)) {
-                String lyrics = lyricsArea.getText();
-                // Delegate to the controller
-                analysisController.execute(lyrics);
-            }
-        });
+        // Attach action listener to this class instance
+        analyzeButton.addActionListener(this);
 
         // --- 2. Visualization Panel ---
         // SentimentPanel is already initialized
@@ -74,6 +65,33 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
 
         // Initial update
         updateViewFromState(analysisViewModel.getState());
+    }
+
+    /**
+     * Setter required to inject the controller after the view is constructed.
+     * @param analysisController The controller instance.
+     */
+    public void setAnalysisController(AnalysisController analysisController) {
+        this.analysisController = analysisController;
+    }
+
+    /**
+     * Handles button clicks.
+     * @param e the ActionEvent to react to
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource().equals(analyzeButton)) {
+            // Check if the controller has been set by the AppBuilder
+            if (this.analysisController != null) {
+                String lyrics = lyricsArea.getText();
+                // Delegate to the controller
+                analysisController.execute(lyrics);
+            } else {
+                // Should not happen in a properly wired application, but good for robustness
+                JOptionPane.showMessageDialog(this, "Application is not fully initialized. Analysis controller is missing.", "System Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     /**
@@ -112,36 +130,7 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         }
     }
 
-    // Simple main method for testing this component, assuming all dependencies are available.
-    public static void main(String[] args) {
-        // --- Setup Dependencies (Simulated for Demo) ---
-        // 1. Data Access (The Gemini API call)
-        // NOTE: Ensure your API Key is set in DBGeminiDataAccessObject.java
-        SentimentDataAccessInterface dao = new DBGeminiDataAccessObject(); // <-- NOW IT WORKS
-
-        // 2. View Model
-        AnalysisViewModel viewModel = new AnalysisViewModel();
-
-        // 3. Presenter
-        AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(viewModel);
-
-        // 4. Interactor
-        AnalyzePlaylistInputBoundary interactor = new AnalyzePlaylistInteractor(dao, presenter);
-
-        // 5. Controller
-        AnalysisController controller = new AnalysisController(interactor, viewModel);
-
-        // --- Build and Run UI ---
-        SwingUtilities.invokeLater(() -> {
-            JFrame application = new JFrame(AnalysisViewModel.TITLE_LABEL);
-            application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            AnalysisView analysisView = new AnalysisView(controller, viewModel);
-
-            application.add(analysisView);
-            application.pack();
-            application.setLocationRelativeTo(null);
-            application.setVisible(true);
-        });
+    public String getViewName() {
+        return VIEW_NAME;
     }
 }

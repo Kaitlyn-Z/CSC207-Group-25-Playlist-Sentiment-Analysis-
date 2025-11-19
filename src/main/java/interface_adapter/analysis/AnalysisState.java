@@ -1,6 +1,6 @@
 package interface_adapter.analysis;
 
-import use_case.analyze_playlist.SentimentResult;
+import entity.SentimentResult;
 
 /**
  * The mutable state data structure for the Analysis View.

@@ -1,7 +1,5 @@
 package view;
 
-import use_case.analyze_playlist.SentimentResult;
-
 import javax.swing.*;
 import java.awt.*;
 

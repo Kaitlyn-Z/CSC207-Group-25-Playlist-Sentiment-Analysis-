@@ -1,122 +1,133 @@
 package view;
 
+import entity.SentimentResult; // <-- Crucial Import
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 /**
- * Custom Swing component to visualize the sentiment result as a bar.
- * Uses color and a bar to represent the score (-1.0 to 1.0).
+ * A custom Swing panel responsible for displaying the structured SentimentResult
+ * returned by the Gemini API analysis.
  */
-public class SentimentPanel extends JComponent {
-    private SentimentResult result = null;
-    private boolean loading = false;
+public class SentimentPanel extends JPanel {
+
+    private final JLabel overallCategoryLabel;
+    private final JProgressBar scoreBar;
+    private final JTextArea summaryArea;
+    private final JLabel breakdownLabel;
+    private final JProgressBar loadingBar;
 
     public SentimentPanel() {
-        setPreferredSize(new Dimension(500, 200));
-        setBorder(BorderFactory.createTitledBorder("Sentiment Visualization"));
+        // Set up the panel layout
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setBorder(BorderFactory.createTitledBorder("Analysis Summary"));
+        this.setBackground(new Color(245, 245, 245));
+
+        // 1. Loading Indicator
+        loadingBar = new JProgressBar();
+        loadingBar.setIndeterminate(true);
+        loadingBar.setStringPainted(true);
+        loadingBar.setString("Waiting for analysis...");
+        loadingBar.setVisible(false); // Hidden by default
+        this.add(loadingBar);
+        this.add(Box.createVerticalStrut(10));
+
+        // 2. Overall Category
+        overallCategoryLabel = new JLabel("Overall Sentiment: N/A");
+        overallCategoryLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        this.add(overallCategoryLabel);
+        this.add(Box.createVerticalStrut(10));
+
+        // 3. Numerical Score Bar
+        JLabel scoreLabel = new JLabel("Sentiment Score (-1.0 to 1.0):");
+        scoreBar = new JProgressBar(-100, 100); // Scale internally to -100 to 100
+        scoreBar.setStringPainted(true);
+        scoreBar.setForeground(new Color(60, 179, 113)); // Medium Sea Green
+        scoreBar.setBackground(new Color(255, 99, 71)); // Tomato Red
+        JPanel scorePanel = new JPanel(new BorderLayout());
+        scorePanel.add(scoreLabel, BorderLayout.NORTH);
+        scorePanel.add(scoreBar, BorderLayout.CENTER);
+        this.add(scorePanel);
+        this.add(Box.createVerticalStrut(15));
+
+        // 4. Summary Text
+        JLabel summaryTitle = new JLabel("Detailed LLM Summary:");
+        summaryTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+        summaryArea = new JTextArea(5, 40);
+        summaryArea.setEditable(false);
+        summaryArea.setLineWrap(true);
+        summaryArea.setWrapStyleWord(true);
+        summaryArea.setText("The analysis results will appear here.");
+        JScrollPane scrollPane = new JScrollPane(summaryArea);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+
+        this.add(summaryTitle);
+        this.add(scrollPane);
+        this.add(Box.createVerticalStrut(15));
+
+        // 5. Breakdown Label (Placeholder for detailed breakdown)
+        breakdownLabel = new JLabel("Sentiment Breakdown: ");
+        this.add(breakdownLabel);
     }
 
     /**
-     * Sets the result data to be visualized and triggers a repaint.
-     * @param result The sentiment data from the analysis.
+     * Updates the panel when a new SentimentResult is available.
+     * This method resolves the error you encountered because it uses entity.SentimentResult.
+     * @param result The SentimentResult entity to display.
      */
     public void setResult(SentimentResult result) {
-        this.result = result;
-        repaint();
+        if (result == null) {
+            overallCategoryLabel.setText("Overall Sentiment: N/A");
+            scoreBar.setValue(0);
+            scoreBar.setString("0.00");
+            summaryArea.setText("The analysis results will appear here.");
+            breakdownLabel.setText("Sentiment Breakdown: ");
+            return;
+        }
+
+        overallCategoryLabel.setText("Overall Sentiment: " + result.getOverallCategory());
+
+        // Update score bar: Map numericalScore (-1.0 to 1.0) to bar range (-100 to 100)
+        int scoreValue = (int) (result.getNumericalScore() * 100);
+        scoreBar.setValue(scoreValue);
+        scoreBar.setString(String.format("%.2f", result.getNumericalScore()));
+
+        // Set color dynamically (e.g., green for positive, red for negative)
+        if (result.getNumericalScore() > 0.1) {
+            scoreBar.setForeground(new Color(60, 179, 113)); // Positive Green
+        } else if (result.getNumericalScore() < -0.1) {
+            scoreBar.setForeground(new Color(255, 99, 71)); // Negative Red
+        } else {
+            scoreBar.setForeground(new Color(173, 216, 230)); // Neutral Blue
+        }
+
+        summaryArea.setText(result.getSummaryText());
+        summaryArea.setCaretPosition(0); // Scroll to top
+
+        // Display the breakdown
+        StringBuilder breakdown = new StringBuilder("Sentiment Breakdown: ");
+        if (!result.getSentimentBreakdown().isEmpty()) {
+            for (Map.Entry<String, Double> entry : result.getSentimentBreakdown().entrySet()) {
+                breakdown.append(String.format("%s: %.0f%% | ",
+                        entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1),
+                        entry.getValue() * 100));
+            }
+            breakdownLabel.setText(breakdown.substring(0, breakdown.length() - 3)); // Remove trailing ' | '
+        } else {
+            breakdownLabel.setText("Sentiment Breakdown: Detailed breakdown not provided.");
+        }
     }
 
     /**
-     * Toggles the loading state, displaying a loading message when true.
-     * @param loading true if analysis is in progress.
+     * Sets the loading state of the panel, showing/hiding the progress bar.
+     * @param isLoading True to show loading state, false to hide.
      */
-    public void setLoading(boolean loading) {
-        this.loading = loading;
-        repaint();
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        int width = getWidth();
-        int height = getHeight();
-
-        // 1. Loading State
-        if (loading) {
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.setFont(new Font("SansSerif", Font.BOLD, 18));
-            String msg = "... Analyzing Lyrics ...";
-            g2d.drawString(msg, width / 2 - g2d.getFontMetrics().stringWidth(msg) / 2, height / 2);
-            return;
-        }
-
-        // 2. Initial/No Data State
-        if (result == null) {
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.setFont(new Font("SansSerif", Font.BOLD, 14));
-            String msg = "Sentiment data will appear here.";
-            g2d.drawString(msg, width / 2 - g2d.getFontMetrics().stringWidth(msg) / 2, height / 2);
-            return;
-        }
-
-        double score = result.score();
-
-        // 3. Draw the neutral line (0.0)
-        int centerLine = width / 2;
-        g2d.setColor(Color.GRAY);
-        g2d.drawLine(centerLine, 20, centerLine, height - 70);
-
-        // 4. Calculate bar width and color
-        int maxBarWidth = centerLine - 50;
-        int barWidth = (int) (maxBarWidth * Math.abs(score));
-
-        // Determine color: Green for positive, Red for negative, Yellow for neutral (close to 0)
-        Color barColor;
-        if (score > 0.1) {
-            float ratio = (float) (score - 0.1) / 0.9f;
-            barColor = interpolateColor(Color.YELLOW, Color.GREEN, ratio);
-        } else if (score < -0.1) {
-            float ratio = (float) (Math.abs(score) - 0.1) / 0.9f;
-            barColor = interpolateColor(Color.YELLOW, Color.RED, ratio);
-        } else {
-            barColor = Color.YELLOW; // Near neutral
-        }
-
-        // 5. Draw the sentiment bar
-        g2d.setColor(barColor);
-        int barHeight = height - 90;
-        int barY = 30;
-
-        if (score > 0) {
-            g2d.fillRect(centerLine, barY, barWidth, barHeight);
-        } else if (score < 0) {
-            g2d.fillRect(centerLine - barWidth, barY, barWidth, barHeight);
-        }
-
-        // 6. Draw labels and score text
-        g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("SansSerif", Font.BOLD, 12));
-        g2d.drawString("-1.0 (Negative)", 5, height / 2);
-        g2d.drawString("1.0 (Positive)", width - 80, height / 2);
-
-        // Draw the current score text
-        g2d.setFont(new Font("SansSerif", Font.BOLD, 16));
-        String scoreText = String.format("Score: %.2f (%s)", score, result.category());
-        g2d.drawString(scoreText, centerLine - g2d.getFontMetrics().stringWidth(scoreText) / 2, height - 50);
-
-        // Draw the explanation
-        g2d.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        String explanation = result.explanation();
-        g2d.drawString("Summary: " + explanation, 20, height - 10);
-    }
-
-    /** Helper to interpolate between two colors. */
-    private Color interpolateColor(Color c1, Color c2, float ratio) {
-        float r = c1.getRed() * (1 - ratio) + c2.getRed() * ratio;
-        float g = c1.getGreen() * (1 - ratio) + c2.getGreen() * ratio;
-        float b = c1.getBlue() * (1 - ratio) + c2.getBlue() * ratio;
-        return new Color((int) r / 255.0f, (int) g / 255.0f, (int) b / 255.0f);
+    public void setLoading(boolean isLoading) {
+        loadingBar.setVisible(isLoading);
+        // Hide other elements when loading
+        overallCategoryLabel.setVisible(!isLoading);
+        scoreBar.getParent().setVisible(!isLoading);
+        summaryArea.getParent().setVisible(!isLoading);
+        breakdownLabel.setVisible(!isLoading);
     }
 }

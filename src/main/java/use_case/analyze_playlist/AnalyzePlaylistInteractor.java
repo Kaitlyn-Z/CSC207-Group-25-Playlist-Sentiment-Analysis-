@@ -1,17 +1,24 @@
 package use_case.analyze_playlist;
 
+import entity.SentimentResult;
+
 import java.io.IOException;
 
 /**
- * The main interactor for the lyric sentiment analysis use case.
- * It coordinates the data access object and the presenter.
+ * The Interactor handles the core business logic for the 'Analyze Playlist' use case.
+ * It takes input data, uses the Data Access Object (DAO) to get the sentiment,
+ * and passes the result to the Presenter.
  */
-public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary { // Using AnalyzePlaylist name from your file structure
+public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
 
-    private final SentimentDataAccessInterface sentimentDataAccessObject;
-    private final AnalyzePlaylistOutputBoundary analyzePlaylistPresenter;
+    final SentimentDataAccessInterface sentimentDataAccessObject;
+    final AnalyzePlaylistOutputBoundary analyzePlaylistPresenter;
 
-    // Assuming AnalyzePlaylistInteractor requires a SentimentDataAccessInterface
+    /**
+     * Constructs the interactor with its dependencies.
+     * @param sentimentDataAccessObject The DAO for getting sentiment analysis (e.g., Gemini API).
+     * @param analyzePlaylistPresenter The presenter for outputting the results to the ViewModel.
+     */
     public AnalyzePlaylistInteractor(
             SentimentDataAccessInterface sentimentDataAccessObject,
             AnalyzePlaylistOutputBoundary analyzePlaylistPresenter) {
@@ -20,39 +27,39 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
     }
 
     /**
-     * Executes the lyric analysis use case.
-     * @param inputData Contains the lyrics string.
+     * Executes the use case: fetches the sentiment and prepares the output view.
+     * @param inputData The input containing the lyrics string.
      */
     @Override
     public void execute(AnalyzePlaylistInputData inputData) {
-        String lyrics = inputData.getLyrics();
+        String lyrics = inputData.getCombinedLyrics();
 
         if (lyrics == null || lyrics.trim().isEmpty()) {
-            analyzePlaylistPresenter.prepareFailView("Lyrics cannot be empty.");
+            analyzePlaylistPresenter.prepareFailView("Please enter some lyrics to analyze.");
             return;
         }
 
-        // Run the blocking API call in a new thread to avoid freezing the Swing UI
-        new Thread(() -> {
-            try {
-                // Call the external data access object (the Gemini API wrapper)
-                SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
+        try {
+            SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
 
-                // Package the successful result and pass it to the Presenter
-                AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(result);
-                analyzePlaylistPresenter.prepareSuccessView(outputData);
+            // Prepare success view data
+            // FIX: The AnalyzePlaylistOutputData constructor requires 4 primitive fields,
+            // which are extracted here from the SentimentResult entity using its getters.
+            AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(
+                    result.getOverallCategory(),
+                    result.getNumericalScore(),
+                    result.getSummaryText(),
+                    result.getSentimentBreakdown()
+            );
 
-            } catch (IOException e) {
-                // Handle API/network failure
-                analyzePlaylistPresenter.prepareFailView("Network/API Error: Could not reach the sentiment service. " + e.getMessage());
-            } catch (InterruptedException e) {
-                // Handle thread interruption
-                Thread.currentThread().interrupt();
-                analyzePlaylistPresenter.prepareFailView("Analysis process was interrupted.");
-            } catch (Exception e) {
-                // Catch any other unexpected errors (like bad parsing)
-                analyzePlaylistPresenter.prepareFailView("Unexpected Analysis Error: " + e.getMessage());
-            }
-        }).start();
+            analyzePlaylistPresenter.prepareSuccessView(outputData);
+
+        } catch (IOException e) {
+            // Handle API or network errors
+            analyzePlaylistPresenter.prepareFailView("Failed to connect to the sentiment analysis service: " + e.getMessage());
+        } catch (Exception e) {
+            // Catch any unexpected runtime errors
+            analyzePlaylistPresenter.prepareFailView("An unexpected error occurred during analysis: " + e.getMessage());
+        }
     }
 }

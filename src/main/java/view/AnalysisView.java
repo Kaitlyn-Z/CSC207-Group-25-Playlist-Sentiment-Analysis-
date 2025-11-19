@@ -1,15 +1,17 @@
 package view;
 
+import data_access.DBGeminiDataAccessObject;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisState;
 import interface_adapter.analysis.AnalysisViewModel;
+import interface_adapter.analysis.AnalysisPresenter;
+import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
+import use_case.analyze_playlist.AnalyzePlaylistInteractor;
+import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
+import use_case.analyze_playlist.SentimentDataAccessInterface; // <-- NEW IMPORT
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -114,8 +116,8 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
     public static void main(String[] args) {
         // --- Setup Dependencies (Simulated for Demo) ---
         // 1. Data Access (The Gemini API call)
-        // NOTE: Ensure your API Key is set in GeminiSentimentDataAccessObject.java
-        SentimentDataAccessInterface dao = new app.data_access.GeminiSentimentDataAccessObject();
+        // NOTE: Ensure your API Key is set in DBGeminiDataAccessObject.java
+        SentimentDataAccessInterface dao = new DBGeminiDataAccessObject(); // <-- NOW IT WORKS
 
         // 2. View Model
         AnalysisViewModel viewModel = new AnalysisViewModel();

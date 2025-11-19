@@ -2,6 +2,7 @@ package interface_adapter.analysis;
 
 import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
 import use_case.analyze_playlist.AnalyzePlaylistOutputData;
+import entity.SentimentResult; // <-- NEW: Import the Entity to construct it
 
 import javax.swing.*;
 
@@ -19,15 +20,25 @@ public class AnalysisPresenter implements AnalyzePlaylistOutputBoundary {
     /**
      * Called by the Interactor on successful completion.
      * Updates the ViewModel with the sentiment result and stops loading.
-     * @param outputData The output data containing the SentimentResult.
+     * @param outputData The output data containing the sentiment result fields.
      */
     @Override
     public void prepareSuccessView(AnalyzePlaylistOutputData outputData) {
         // Update the state on the AWT Event Dispatch Thread (Swing requirement)
         SwingUtilities.invokeLater(() -> {
             AnalysisState state = analysisViewModel.getState();
+
+            // FIX: OutputData contains primitives. We must reconstruct the SentimentResult Entity
+            // that the AnalysisState expects using the primitive getters.
+            SentimentResult result = new SentimentResult(
+                    outputData.getOverallCategory(),
+                    outputData.getNumericalScore(),
+                    outputData.getSummaryText(),
+                    outputData.getSentimentBreakdown()
+            );
+
             state.setLoading(false);
-            state.setResult(outputData.getResult());
+            state.setResult(result); // Now we pass the correct object type
             analysisViewModel.firePropertyChanged();
         });
     }

@@ -1,16 +1,24 @@
 package use_case.analyze_playlist;
 
 /**
- * The input data structure for the Interactor, carrying the required lyrics.
+ * The Input Data structure for the Analyze Playlist use case.
+ * It holds the raw data necessary to execute the use case logic,
+ * which in this case is the combined string of song lyrics.
  */
-public class AnalyzePlaylistInputData { // Renamed from AnalyzeLyricInputData to match file structure
-    private final String lyrics;
+public class AnalyzePlaylistInputData {
 
-    public AnalyzePlaylistInputData(String lyrics) {
-        this.lyrics = lyrics;
+    private final String combinedLyrics;
+
+    /**
+     * Constructs the Input Data object.
+     * @param combinedLyrics The concatenated string of all lyrics to be analyzed.
+     */
+    public AnalyzePlaylistInputData(String combinedLyrics) {
+        this.combinedLyrics = combinedLyrics;
     }
 
-    public String getLyrics() {
-        return lyrics;
+    // Getter
+    public String getCombinedLyrics() {
+        return combinedLyrics;
     }
 }

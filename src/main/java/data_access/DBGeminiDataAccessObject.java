@@ -21,15 +21,27 @@ import java.util.Map;
  */
 public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
-    // IMPORTANT: For demonstration. In a real application, load this from a secure environment variable.
-    private static final String API_KEY = ""; // REPLACE WITH YOUR ACTUAL KEY
+    // Removed static API_KEY field. Key is now loaded from environment variable.
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
     private final HttpClient httpClient;
     private final Gson gson;
+    private final String apiKey; // Instance field to hold the key
 
     public DBGeminiDataAccessObject() {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
+
+        // Load the key from the environment variable.
+        // We use a specific, secure name for the variable.
+        String key = System.getenv("GEMINI_API_KEY");
+
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "The GEMINI_API_KEY environment variable is not set or is empty. " +
+                            "Please configure it in your IntelliJ Run Configuration or system environment."
+            );
+        }
+        this.apiKey = key;
     }
 
     /**
@@ -52,10 +64,6 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
      */
     @Override
     public SentimentResult analyzeSentiment(String combinedLyrics) throws IOException {
-        if (API_KEY.isEmpty()) {
-            throw new IOException("Gemini API Key is not set in DBGeminiDataAccessObject.java.");
-        }
-
         // --- 1. Build the API Request Payload ---
         String systemInstruction = createSystemInstruction();
         String userQuery = "Analyze the sentiment of this playlist's lyrics and explain your finding: \n\n--- LYRICS ---\n\n" + combinedLyrics;
@@ -87,7 +95,8 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
 
         // --- 2. Execute the HTTP Request ---
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_URL + "?key=" + API_KEY))
+                // Use the loaded apiKey instance variable here
+                .uri(URI.create(API_URL + "?key=" + this.apiKey))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -146,7 +155,10 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
             String sentimentExplanation = (String) sentimentData.getOrDefault("sentimentExplanation", "No explanation provided.");
 
             // Step 4: Create and return the Entity, using 0.0 and emptyMap for the old fields
-            return new SentimentResult(sentimentWord, sentimentExplanation);
+            return new SentimentResult(
+                    sentimentWord,
+                    sentimentExplanation
+            );
 
         } catch (Exception e) {
             // Catch parsing errors (e.g., API didn't return perfect JSON)

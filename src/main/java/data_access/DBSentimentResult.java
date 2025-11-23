@@ -3,6 +3,7 @@ package data_access;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import entity.SentimentResult;
+import entity.SentimentResultFactory;
 import use_case.analyze_playlist.SentimentDataAccessInterface;
 
 import java.io.IOException;
@@ -10,35 +11,39 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Concrete implementation of the SentimentDataAccessInterface that uses the Gemini API
  * to perform sentiment analysis on a block of lyrics.
- * NOTE: This class uses the built-in Java 11+ HttpClient and the Gson library for JSON parsing.
- * The analysis provides a descriptive "sentiment word" and "explanation."
+ * This class delegates the creation of the final SentimentResult entity to a factory.
  */
-public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
+public class DBSentimentResult implements SentimentDataAccessInterface {
 
-    // Removed static API_KEY field. Key is now loaded from environment variable.
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
     private final HttpClient httpClient;
     private final Gson gson;
-    private final String apiKey; // Instance field to hold the key
+    private final String apiKey;
+    private final SentimentResultFactory sentimentResultFactory; // New Factory field
 
-    public DBGeminiDataAccessObject() {
+    /**
+     * Constructs the data access object, loading the API key and accepting a factory dependency.
+     *
+     * @param resultFactory The factory responsible for creating SentimentResult entities.
+     * @throws IllegalArgumentException if the GEMINI_API_KEY environment variable is not set.
+     */
+    public DBSentimentResult(SentimentResultFactory resultFactory) {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
+        this.sentimentResultFactory = resultFactory;
 
-        // Load the key from the environment variable.
-        // We use a specific, secure name for the variable.
         String key = System.getenv("GEMINI_API_KEY");
 
         if (key == null || key.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "The GEMINI_API_KEY environment variable is not set or is empty. " +
-                            "Please configure it in your IntelliJ Run Configuration or system environment."
+                            "Please add your API key to Run Configuration or system environment."
             );
         }
         this.apiKey = key;
@@ -47,6 +52,7 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
     /**
      * Constructs the system instruction that forces the Gemini model to respond
      * with a JSON object matching the required schema for Sentiment analysis.
+     * @return The system instruction as a String.
      */
     private String createSystemInstruction() {
         return "You are a professional music analysis engine. Analyze the following combined lyrics from a playlist. " +
@@ -64,11 +70,38 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
      */
     @Override
     public SentimentResult analyzeSentiment(String combinedLyrics) throws IOException {
-        // --- 1. Build the API Request Payload ---
+        // ... (API Payload construction remains the same)
+        String requestBody = getString(combinedLyrics);
+
+
+        // --- 2. Execute the HTTP Request ---
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL + "?key=" + this.apiKey))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                String error = "Gemini API Error (Status: " + response.statusCode() + "): " + response.body();
+                throw new IOException(error);
+            }
+
+            // --- 3. Parse the API Response ---
+            return parseGeminiResponse(response.body());
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("API request interrupted.", e);
+        }
+    }
+
+    private String getString(String combinedLyrics) {
         String systemInstruction = createSystemInstruction();
         String userQuery = "Analyze the sentiment of this playlist's lyrics and explain your finding: \n\n--- LYRICS ---\n\n" + combinedLyrics;
 
-        // Escape quotes and newlines for JSON string formatting
         String escapedUserQuery = userQuery.replace("\"", "\\\"").replace("\n", "\\n");
         String escapedSystemInstruction = systemInstruction.replace("\"", "\\\"");
 
@@ -91,38 +124,12 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
                 }
             }
             """, escapedUserQuery, escapedSystemInstruction);
-
-
-        // --- 2. Execute the HTTP Request ---
-        HttpRequest request = HttpRequest.newBuilder()
-                // Use the loaded apiKey instance variable here
-                .uri(URI.create(API_URL + "?key=" + this.apiKey))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                // If the API returns an error status code
-                String error = "Gemini API Error (Status: " + response.statusCode() + "): " + response.body();
-                throw new IOException(error);
-            }
-
-            // --- 3. Parse the API Response ---
-            return parseGeminiResponse(response.body());
-
-        } catch (InterruptedException e) {
-            // Handle thread interruption
-            Thread.currentThread().interrupt();
-            throw new IOException("API request interrupted.", e);
-        }
+        return requestBody;
     }
 
     /**
      * Parses the complex nested JSON response from the Gemini API and extracts the
-     * structured Sentiment JSON, then converts it into a SentimentResult entity.
+     * structured Sentiment JSON, then uses the factory to convert it into a SentimentResult entity.
      * @param jsonResponse The raw JSON string from the API.
      * @return A SentimentResult entity (now focused on descriptive Sentiment).
      * @throws IOException If the JSON structure is unexpected or parsing fails.
@@ -133,13 +140,18 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
             Map<String, Object> responseMap = gson.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {}.getType());
 
             // Step 2: Navigate to the content part containing the generated JSON text
-            java.util.List<?> candidates = (java.util.List<?>) responseMap.get("candidates");
+            @SuppressWarnings("unchecked")
+            List<Object> candidates = (List<Object>) responseMap.get("candidates");
             if (candidates == null || candidates.isEmpty()) {
                 throw new IOException("API response missing 'candidates'. Response: " + jsonResponse);
             }
+            @SuppressWarnings("unchecked")
             Map<String, Object> candidate = (Map<String, Object>) candidates.get(0);
+            @SuppressWarnings("unchecked")
             Map<String, Object> content = (Map<String, Object>) candidate.get("content");
-            java.util.List<?> parts = (java.util.List<?>) content.get("parts");
+            @SuppressWarnings("unchecked")
+            List<Object> parts = (List<Object>) content.get("parts");
+            @SuppressWarnings("unchecked")
             Map<String, Object> part = (Map<String, Object>) parts.get(0);
             String sentimentJsonString = (String) part.get("text");
 
@@ -154,14 +166,10 @@ public class DBGeminiDataAccessObject implements SentimentDataAccessInterface {
             String sentimentWord = (String) sentimentData.getOrDefault("sentimentWord", "Undetermined");
             String sentimentExplanation = (String) sentimentData.getOrDefault("sentimentExplanation", "No explanation provided.");
 
-            // Step 4: Create and return the Entity, using 0.0 and emptyMap for the old fields
-            return new SentimentResult(
-                    sentimentWord,
-                    sentimentExplanation
-            );
+            // Step 4: Use the Factory to create the entity
+            return sentimentResultFactory.create(sentimentWord, sentimentExplanation);
 
         } catch (Exception e) {
-            // Catch parsing errors (e.g., API didn't return perfect JSON)
             throw new IOException("Failed to parse Gemini API response. Check API key and response format. Error: " + e.getMessage(), e);
         }
     }

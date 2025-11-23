@@ -3,8 +3,9 @@ package app;
 import data_access.DBPlaylistDataAccessObject;
 import data_access.DBSongDataAccessObject;
 import data_access.DBUserDataAccessObject;
-import data_access.DBGeminiDataAccessObject;
+import data_access.DBSentimentResult;
 
+import entity.SentimentResultFactory;
 import entity.UserFactory;
 import entity.SongFactory;
 import entity.PlaylistFactory;
@@ -16,8 +17,6 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
-import interface_adapter.logout.LogoutController;
-import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisPresenter;
 
@@ -25,9 +24,6 @@ import interface_adapter.analysis.AnalysisPresenter;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
-import use_case.logout.LogoutInputBoundary;
-import use_case.logout.LogoutInteractor;
-import use_case.logout.LogoutOutputBoundary;
 import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
 import use_case.analyze_playlist.AnalyzePlaylistInteractor;
 import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
@@ -95,8 +91,10 @@ public class AppBuilder {
      * @return The AppBuilder instance for method chaining.
      */
     public AppBuilder addAnalysisUseCase() {
+        SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
+
         // 1. Create the Data Access Object (Using the renamed class with Java 11 HttpClient)
-        SentimentDataAccessInterface dao = new DBGeminiDataAccessObject();
+        SentimentDataAccessInterface dao = new DBSentimentResult(sentimentResultFactory);
 
         // 2. Create the Presenter (Updates the ViewModel)
         AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(this.analysisViewModel);
@@ -142,10 +140,6 @@ public class AppBuilder {
         loggedInView.setLogoutController(logoutController);
         return this;
     }
-
-    /*
-    public AppBuilder addAnalysisUseCase(){}
-     */
 
     public JFrame build() {
         final JFrame application = new JFrame("User Login");

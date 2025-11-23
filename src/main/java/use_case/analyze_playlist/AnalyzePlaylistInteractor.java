@@ -43,8 +43,8 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
             SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
 
             AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(
-                    result.getOverallCategory(),
-                    result.getSummaryText()
+                    result.getSentimentWord(),
+                    result.getSentimentExplanation()
             );
 
             analyzePlaylistPresenter.prepareSuccessView(outputData);

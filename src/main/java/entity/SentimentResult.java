@@ -24,31 +24,11 @@ public class SentimentResult {
         this.sentimentExplanation = sentimentExplanation;
     }
 
-    // --- Getters (making the object effectively immutable) ---
-
     public String getSentimentWord() {
         return sentimentWord;
     }
 
     public String getSentimentExplanation() {
         return sentimentExplanation;
-    }
-
-    // --- Compatibility Getters (renamed to match old DTO structure, but return new fields) ---
-
-    public String getOverallCategory() {
-        return sentimentWord;
-    }
-
-    public String getSummaryText() {
-        return sentimentExplanation;
-    }
-
-    /**
-     * Provides a brief string representation for debugging or quick display.
-     */
-    @Override
-    public String toString() {
-        return sentimentWord;
     }
 }

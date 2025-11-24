@@ -45,7 +45,6 @@ public class DBUserDataAccessObject
         // implement DB insert/update
     }
 
-    private User currentUser;
 
     @Override
     public void setCurrentUser(User user) {

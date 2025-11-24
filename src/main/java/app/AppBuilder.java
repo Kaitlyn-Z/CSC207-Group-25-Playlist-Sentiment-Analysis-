@@ -1,13 +1,11 @@
 package app;
 
 import data_access.DBPlaylistDataAccessObject;
-import data_access.DBSongDataAccessObject;
 import data_access.DBUserDataAccessObject;
 import data_access.DBSentimentResult;
 
 import entity.SentimentResultFactory;
 import entity.UserFactory;
-import entity.SongFactory;
 import entity.PlaylistFactory;
 
 
@@ -45,13 +43,11 @@ public class AppBuilder {
     private final CardLayout cardLayout = new CardLayout();
     final UserFactory userFactory = new UserFactory();
     final PlaylistFactory playlistFactory = new PlaylistFactory();
-    final SongFactory songFactory = new SongFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
     final DBPlaylistDataAccessObject playlistDataAccessObject = new DBPlaylistDataAccessObject(playlistFactory);
-    final DBSongDataAccessObject songDataAccessObject = new DBSongDataAccessObject(songFactory);
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -129,17 +125,17 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addLogoutUseCase() {
-        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
-
-        final LogoutInputBoundary logoutInteractor =
-                new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
-
-        final LogoutController logoutController = new LogoutController(logoutInteractor);
-        loggedInView.setLogoutController(logoutController);
-        return this;
-    }
+//    public AppBuilder addLogoutUseCase() {
+//        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
+//                loggedInViewModel, loginViewModel);
+//
+//        final LogoutInputBoundary logoutInteractor =
+//                new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
+//
+//        final LogoutController logoutController = new LogoutController(logoutInteractor);
+//        loggedInView.setLogoutController(logoutController);
+//        return this;
+//    }
 
     public JFrame build() {
         final JFrame application = new JFrame("User Login");

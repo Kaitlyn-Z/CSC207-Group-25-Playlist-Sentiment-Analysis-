@@ -1,3 +1,8 @@
 package interface_adapter.logged_in;
 
-public class LoggedInViewModel{}
+import view.LoggedInView;
+
+public class LoggedInViewModel{
+    public void addPropertyChangeListener(LoggedInView loggedInView) {
+    }
+}

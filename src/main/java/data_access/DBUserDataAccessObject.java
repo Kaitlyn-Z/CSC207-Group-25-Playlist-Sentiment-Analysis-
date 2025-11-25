@@ -2,12 +2,28 @@ package data_access;
 
 import entity.User;
 import entity.UserFactory;
+import use_case.logout.LogoutUserDataAccessInterface;
+import use_case.login.LoginUserDataAccessInterface;
 
-public class DBUserDataAccessObject implements UserDataAccessInterface {
+public class DBUserDataAccessObject
+        implements LoginUserDataAccessInterface, LogoutUserDataAccessInterface, UserDataAccessInterface{
 
-    // whatever fields/constructors already exist
+    /*
+    necessity & variable according to the needs of API
+    private static final int SUCCESS_CODE = 200;
+    private static final String STATUS_CODE_LABEL = "status_code";
+    private static final String CONTENT_TYPE_LABEL = "Content-Type";
+    private static final String CONTENT_TYPE_JSON = "application/json";
+
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+    private static final String MESSAGE = "message";
+    */
 
     private final UserFactory userFactory;
+
+    // --- keep track of the currently logged-in user in memory ---
+    private User currentUser;
 
     public DBUserDataAccessObject(UserFactory userFactory) { this.userFactory = userFactory; }
 
@@ -29,7 +45,6 @@ public class DBUserDataAccessObject implements UserDataAccessInterface {
         // implement DB insert/update
     }
 
-    private User currentUser;
 
     @Override
     public void setCurrentUser(User user) {

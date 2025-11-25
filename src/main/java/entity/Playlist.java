@@ -1,122 +1,40 @@
 package entity;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
- * Playlist entity that stores songs as a list of small maps:
- * [
- *   {"Adele": "Hello"},
- *   {"Jay Chou": "七里香"},
- *   {"Linkin Park": "Numb"}
- * ]
- *
- * Each map contains EXACTLY one pair:
- *   artist -> title
+ * An entity representing a playlist
  */
 public class Playlist {
-
-    private String name;
+    private String playlistName;
     private final String playlistId;
-    private final String userId;
-    private int songNumber;
+    private JsonArray songs; //expected type: [{"artist": artistName1, "title": songName1}, {"artist":name2, "title": title2}]
+    private boolean selected;
 
-    // ★ Key part: Song list in the format Dylan wants
-    private List<Map<String, String>> songs;
-
-    // Keep one Gson object
-    private static final Gson gson = new Gson();
-
-    public Playlist(String playlistId, String userId, String name, int songNumber) {
+    public Playlist(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
-        this.userId = userId;
-        this.name = name;
-        this.songNumber = songNumber;
-        this.songs = new ArrayList<>();
-    }
-
-    // =============================
-    //          BASIC GETTERS
-    // =============================
-
-    public String getPlaylistId() { return playlistId; }
-
-    public String getUserId() { return userId; }
-
-    public String getName() { return name; }
-
-    public int getSongNumber() { return songNumber; }
-
-    public List<Map<String, String>> getSongs() { return songs; }
-
-    // =============================
-    //           MUTATORS
-    // =============================
-
-    public void setName(String name) { this.name = name; }
-
-    public void setSongs(List<Map<String, String>> songs) {
+        this.playlistName = playlistName;
         this.songs = songs;
-        this.songNumber = songs.size();
+        this.selected = false; // default: unselected
     }
 
-    // =============================
-    //     SONG MANIPULATION
-    // =============================
-
-    /** Add a new song in {artist : title} format */
-    public void addSong(String artist, String title) {
-        Map<String, String> entry = new HashMap<>();
-        entry.put(artist, title);
-        songs.add(entry);
-        songNumber++;
+    public boolean isSelected() {
+        return selected;
     }
 
-    /** Remove the first matching {artist : title} pair */
-    public boolean removeSong(String artist, String title) {
-        Iterator<Map<String, String>> it = songs.iterator();
-
-        while (it.hasNext()) {
-            Map<String, String> pair = it.next();
-            if (pair.containsKey(artist) && pair.get(artist).equals(title)) {
-                it.remove();
-                songNumber--;
-                return true;
-            }
-        }
-        return false;
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
-    // =============================
-    //      JSON SERIALIZATION
-    // =============================
-
-    /** Convert songs list to JSON string */
-    public String songsToJson() {
-        return gson.toJson(songs);
+    public String getPlaylistId() {
+        return playlistId;
     }
 
-    /** Load songs from a JSON string */
-    public void loadSongsFromJson(String json) {
-        Type listType = new TypeToken<List<Map<String, String>>>() {}.getType();
-        this.songs = gson.fromJson(json, listType);
+    public JsonArray getSongs() {return songs;}
 
-        if (songs == null) {
-            songs = new ArrayList<>();
-        }
-        this.songNumber = songs.size();
-    }
+    public String getPlaylistName() {return playlistName;}
 
-    @Override
-    public String toString() {
-        return "Playlist{" +
-                "name='" + name + '\'' +
-                ", playlistId='" + playlistId + '\'' +
-                ", userId='" + userId + '\'' +
-                ", songs=" + songs +
-                '}';
-    }
+
+
 }

@@ -17,17 +17,23 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.logout.LogoutController;
+import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisPresenter;
-
 
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
+import use_case.logout.LogoutInputBoundary;
+import use_case.logout.LogoutInteractor;
+import use_case.logout.LogoutOutputBoundary;
 import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
 import use_case.analyze_playlist.AnalyzePlaylistInteractor;
 import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
 import use_case.analyze_playlist.SentimentDataAccessInterface;
+
+
 
 
 import view.AnalysisView;
@@ -38,6 +44,7 @@ import view.LoginView;
 
 import javax.swing.*;  //JFrame...
 import java.awt.*;  //Color...
+
 
 
 public class AppBuilder {
@@ -85,11 +92,6 @@ public class AppBuilder {
         return this;
     }
 
-    /**
-     * Wires the Analyze Playlist Use Case: DAO -> Interactor -> Presenter -> ViewModel -> View.
-     * This method is required to resolve the dependency for the AnalysisView's controller.
-     * @return The AppBuilder instance for method chaining.
-     */
     public AppBuilder addAnalysisUseCase() {
         SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
 
@@ -130,16 +132,22 @@ public class AppBuilder {
     }
 
     public AppBuilder addLogoutUseCase() {
-        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
+        LogoutOutputBoundary logoutOutputBoundary =
+                new LogoutPresenter(viewManagerModel, loggedInViewModel, loginViewModel);
 
-        final LogoutInputBoundary logoutInteractor =
+        LogoutInputBoundary logoutInteractor =
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
+        //  ^ userDataAccessObject now implements LogoutUserDataAccessInterface
 
-        final LogoutController logoutController = new LogoutController(logoutInteractor);
+        LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
         return this;
     }
+
+
+    /*
+    public AppBuilder addAnalysisUseCase(){}
+     */
 
     public JFrame build() {
         final JFrame application = new JFrame("User Login");

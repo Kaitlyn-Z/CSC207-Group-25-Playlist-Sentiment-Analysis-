@@ -1,6 +1,10 @@
 package use_case.analyze_playlist;
 
+import com.google.gson.JsonArray;
+import entity.PlaylistFactory;
 import entity.SentimentResult;
+import entity.Playlist;
+import entity.SentimentResultFactory;
 
 import java.io.IOException;
 
@@ -10,26 +14,44 @@ import java.io.IOException;
  * and passes the result to the Presenter.
  */
 public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
-
-    final SentimentDataAccessInterface sentimentDataAccessObject;
-    final AnalyzePlaylistOutputBoundary analyzePlaylistPresenter;
+    private final SentimentDataAccessInterface sentimentDataAccessObject;
+    private final AnalyzePlaylistOutputBoundary analyzePlaylistPresenter;
+    private final PlaylistFactory playlistFactory;
+    private final SentimentResultFactory sentimentResultFactory;
+    private final SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject;
 
     /**
      * Constructs the interactor with its dependencies.
-     * @param sentimentDataAccessObject The DAO for getting sentiment analysis (e.g., Gemini API).
-     * @param analyzePlaylistPresenter The presenter for outputting the results to the ViewModel.
      */
-    public AnalyzePlaylistInteractor(
-            SentimentDataAccessInterface sentimentDataAccessObject,
-            AnalyzePlaylistOutputBoundary analyzePlaylistPresenter) {
+    public AnalyzePlaylistInteractor(PlaylistFactory playlistFactory,
+                                     SentimentResultFactory sentimentResultFactory,
+                                     SentimentDataAccessInterface sentimentDataAccessObject,
+                                     AnalyzePlaylistOutputBoundary analyzePlaylistPresenter,
+                                     SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject) {
         this.sentimentDataAccessObject = sentimentDataAccessObject;
         this.analyzePlaylistPresenter = analyzePlaylistPresenter;
+        this.playlistFactory = playlistFactory;
+        this.sentimentResultFactory = sentimentResultFactory;
+        this.spotifyPlaylistDataAccessObject = spotifyPlaylistDataAccessObject;
     }
 
+    @Override
+    public void execute(AnalyzePlaylistInputData analyzePlaylistInputData) {
+        final Playlist playlist = playlistFactory.create(analyzePlaylistInputData.getPlaylistId(),
+                analyzePlaylistInputData.getPlaylistname(),
+                analyzePlaylistInputData.getSongs());
+        final JsonArray songsInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
+        //randomly selected songs' info [{"artist": artistName, "title": titleName, "lyrics": lyrics}, {}...]
+    }
+
+
+
+    //TODO: merge your code into execute method (I have made runtimeException for no songs or no lyrics situations, you can find them in DBPlaylistDAO)
     /**
      * Executes the use case: fetches the sentiment and prepares the output view.
      * @param inputData The input containing the lyrics string.
      */
+    /*
     @Override
     public void execute(AnalyzePlaylistInputData inputData) {
         String lyrics = inputData.getCombinedLyrics();
@@ -57,4 +79,6 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
             analyzePlaylistPresenter.prepareFailView("An unexpected error occurred during analysis: " + e.getMessage());
         }
     }
+    */
+
 }

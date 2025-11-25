@@ -1,7 +1,9 @@
 package entity;
 
+import com.google.gson.JsonArray;
+
 public class PlaylistFactory {
-    public Playlist create(String playlistId, String userId, String name, int songNumber) {
-        return new Playlist(playlistId, userId, name, songNumber);
+    public Playlist create(String playlistId, String playlistName, JsonArray songs) {
+        return new Playlist(playlistId, playlistName, songs);
     }
 }

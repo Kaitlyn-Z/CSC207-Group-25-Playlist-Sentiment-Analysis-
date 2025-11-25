@@ -56,8 +56,29 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         bottomBar.add(logoutButton);
         add(bottomBar, BorderLayout.SOUTH);
-    }
 
+        //TODO: expected button for analysis use case
+        /*
+        private JButton analyzeSentiments;
+
+        analyzeSentiments = new JButton("Analyze Sentiments");
+        buttons.add(analyzeSentiments);
+
+        analyzeSentiments.addActionListener(
+                evt -> {
+                    if (evt.getSource().equals(analyzeSentiments)) {
+                        final AnalysisState currentState = analysisViewModel.getState();
+
+                        this.analysisController.execute(
+                                currentState.getPlaylistId(),
+                                currentState.getPlaylistName(),
+                                currentState.getSongs()
+                        );
+                    }
+                }
+        );
+        */
+    }
     // AppBuilder will call this
     public void setLogoutController(LogoutController controller) {
         this.logoutController = controller;

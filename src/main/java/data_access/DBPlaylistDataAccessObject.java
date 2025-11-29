@@ -1,7 +1,6 @@
 package data_access;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import entity.PlaylistFactory;
@@ -23,18 +22,17 @@ public class DBPlaylistDataAccessObject implements SpotifyPlaylistDataAccessInte
     private final PlaylistFactory playlistFactory;
     private static final int MAX_SONGS = 5;
 
-    public DBPlaylistDataAccessObject(PlaylistFactory playlistFactory) {
-        this.playlistFactory = playlistFactory;
-    }
+    public DBPlaylistDataAccessObject(PlaylistFactory playlistFactory) {this.playlistFactory = playlistFactory;}
 
     @Override
-    public JsonArray getLyrics(JsonArray songs){
+    public JsonArray getLyrics(JsonArray songs) {
         final JsonArray songsInfo = new JsonArray();
         final JsonArray songsCopy = songs.deepCopy();
-        if(songs.size() > 0) {
+        if (songs.size() > 0) {
             while (songsCopy.size() != 0 && songsInfo.size() < MAX_SONGS) {
-                JsonObject song = getRandomSong(songsCopy).getAsJsonObject();
-                songsCopy.remove(song);
+                int index = ThreadLocalRandom.current().nextInt(0, songsCopy.size());
+                JsonObject song = songsCopy.get(index).getAsJsonObject();
+                songsCopy.remove(index);
                 String artist = song.get("artist").getAsString();
                 String title = song.get("title").getAsString();
 
@@ -64,23 +62,18 @@ public class DBPlaylistDataAccessObject implements SpotifyPlaylistDataAccessInte
                         songInfo.addProperty("title", title);
                         songInfo.addProperty("lyrics", lyrics);
                         songsInfo.add(songInfo);
-                        }
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
-            if(songsInfo.size() == 0) {
+            if (songsInfo.size() == 0) {
                 throw new RuntimeException("No lyrics found");
             }
-        }
-        else{
+        } else {
             throw new RuntimeException("No songs in playlist");
         }
         return songsInfo;
     }
 
-    public JsonElement getRandomSong(JsonArray songs) {
-        int index = ThreadLocalRandom.current().nextInt(songs.size());
-        return songs.get(index);
-    }
 }

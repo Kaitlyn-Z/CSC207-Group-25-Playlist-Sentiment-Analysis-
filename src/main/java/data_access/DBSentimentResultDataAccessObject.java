@@ -19,7 +19,7 @@ import java.util.Map;
  * to perform sentiment analysis on a block of lyrics.
  * This class delegates the creation of the final SentimentResult entity to a factory.
  */
-public class DBSentimentResult implements SentimentDataAccessInterface {
+public class DBSentimentResultDataAccessObject implements SentimentDataAccessInterface {
 
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
     private final HttpClient httpClient;
@@ -33,7 +33,7 @@ public class DBSentimentResult implements SentimentDataAccessInterface {
      * @param resultFactory The factory responsible for creating SentimentResult entities.
      * @throws IllegalArgumentException if the GEMINI_API_KEY environment variable is not set.
      */
-    public DBSentimentResult(SentimentResultFactory resultFactory) {
+    public DBSentimentResultDataAccessObject(SentimentResultFactory resultFactory) {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
         this.sentimentResultFactory = resultFactory;

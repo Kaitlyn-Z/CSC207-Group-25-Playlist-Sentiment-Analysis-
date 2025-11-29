@@ -2,7 +2,7 @@ package interface_adapter.logged_in;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
+import view.LoggedInView;
 public class LoggedInViewModel {
 
     public static class State {

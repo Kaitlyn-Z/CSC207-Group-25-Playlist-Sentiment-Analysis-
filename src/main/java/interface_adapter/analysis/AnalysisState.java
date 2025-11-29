@@ -2,6 +2,7 @@ package interface_adapter.analysis;
 
 import entity.SentimentResult;
 
+//TODO: Since you don't need to input lyrics from outside, these codes may need to be modified.
 /**
  * The mutable state data structure for the Analysis View.
  */

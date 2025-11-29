@@ -2,7 +2,7 @@ package app;
 
 import data_access.DBPlaylistDataAccessObject;
 import data_access.DBUserDataAccessObject;
-import data_access.DBSentimentResult;
+import data_access.DBSentimentResultDataAccessObject;
 
 import entity.SentimentResultFactory;
 import entity.UserFactory;
@@ -15,17 +15,18 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.logout.LogoutController;
+import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisPresenter;
 
-
+import use_case.analyze_playlist.*;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
-import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
-import use_case.analyze_playlist.AnalyzePlaylistInteractor;
-import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
-import use_case.analyze_playlist.SentimentDataAccessInterface;
+import use_case.logout.LogoutInputBoundary;
+import use_case.logout.LogoutInteractor;
+import use_case.logout.LogoutOutputBoundary;
 
 
 import view.AnalysisView;
@@ -38,16 +39,20 @@ import javax.swing.*;  //JFrame...
 import java.awt.*;  //Color...
 
 
+
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     final UserFactory userFactory = new UserFactory();
     final PlaylistFactory playlistFactory = new PlaylistFactory();
+    final SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
-    final DBPlaylistDataAccessObject playlistDataAccessObject = new DBPlaylistDataAccessObject(playlistFactory);
+    final DBSentimentResultDataAccessObject sentimentDataAccessObject = new DBSentimentResultDataAccessObject(sentimentResultFactory);
+    final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject = new DBPlaylistDataAccessObject(playlistFactory);
+
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -81,17 +86,18 @@ public class AppBuilder {
         return this;
     }
 
-    /**
-     * Wires the Analyze Playlist Use Case: DAO -> Interactor -> Presenter -> ViewModel -> View.
-     * This method is required to resolve the dependency for the AnalysisView's controller.
-     * @return The AppBuilder instance for method chaining.
-     */
     public AppBuilder addAnalysisUseCase() {
-        SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
+        final AnalyzePlaylistOutputBoundary analyzePlaylistOutputBoundary = new AnalysisPresenter(analysisViewModel);
 
-        // 1. Create the Data Access Object (Using the renamed class with Java 11 HttpClient)
-        SentimentDataAccessInterface dao = new DBSentimentResult(sentimentResultFactory);
+        final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
+                sentimentResultFactory, sentimentDataAccessObject, analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject);
 
+        AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
+        analysisView.setAnalysisController(analysisController);
+        return this;
+    }
+     //TODO: Some of them shouldn't be put here, I have moved Factory and DAO to the front
+/*
         // 2. Create the Presenter (Updates the ViewModel)
         AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(this.analysisViewModel);
 
@@ -111,7 +117,7 @@ public class AppBuilder {
 
         return this;
     }
-
+*/
     // Connect UseCase to interface_adapter
     //These are just templates, everyone can change them if u need
     public AppBuilder addLoginUseCase() {
@@ -126,16 +132,22 @@ public class AppBuilder {
     }
 
     public AppBuilder addLogoutUseCase() {
-        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
+        LogoutOutputBoundary logoutOutputBoundary =
+                new LogoutPresenter(viewManagerModel, loggedInViewModel, loginViewModel);
 
-        final LogoutInputBoundary logoutInteractor =
+        LogoutInputBoundary logoutInteractor =
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
+        //  ^ userDataAccessObject now implements LogoutUserDataAccessInterface
 
-        final LogoutController logoutController = new LogoutController(logoutInteractor);
+        LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
         return this;
     }
+
+
+    /*
+    public AppBuilder addAnalysisUseCase(){}
+     */
 
     public JFrame build() {
         final JFrame application = new JFrame("User Login");

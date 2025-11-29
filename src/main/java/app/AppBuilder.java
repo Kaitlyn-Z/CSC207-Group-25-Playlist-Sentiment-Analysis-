@@ -125,17 +125,17 @@ public class AppBuilder {
         return this;
     }
 
-//    public AppBuilder addLogoutUseCase() {
-//        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
-//                loggedInViewModel, loginViewModel);
-//
-//        final LogoutInputBoundary logoutInteractor =
-//                new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
-//
-//        final LogoutController logoutController = new LogoutController(logoutInteractor);
-//        loggedInView.setLogoutController(logoutController);
-//        return this;
-//    }
+    public AppBuilder addLogoutUseCase() {
+        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
+                loggedInViewModel, loginViewModel);
+
+        final LogoutInputBoundary logoutInteractor =
+                new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
+
+        final LogoutController logoutController = new LogoutController(logoutInteractor);
+        loggedInView.setLogoutController(logoutController);
+        return this;
+    }
 
     public JFrame build() {
         final JFrame application = new JFrame("User Login");

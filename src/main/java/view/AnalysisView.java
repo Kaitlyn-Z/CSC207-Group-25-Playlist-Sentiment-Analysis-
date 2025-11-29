@@ -1,5 +1,6 @@
 package view;
 
+import entity.Playlist;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisState;
 import interface_adapter.analysis.AnalysisViewModel;
@@ -37,13 +38,14 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     // TODO: replace with info from user's spotify account
     private final String PLAYLIST_NAME = "Sample Playlist";
     private final List<Song> playlistSongs = List.of(
-            new Song("The Lonely Road", "Green Day (Mock)", "I walk the lonely road, the only one that I have ever known. Don't know where it goes, but it's home to me and I walk alone."),
+            new Song("Become the Warm Jets", "Green Day (Mock)", "I walk the lonely road, the only one that I have ever known. Don't know where it goes, but it's home to me and I walk alone."),
             new Song("Sunshine", "Artist X", "The sun shines bright, making everything feel right. A smile on my face, winning the race."),
             new Song("Midnight Rain", "Artist Y", "Silent streets, a hidden tear. Waiting for the light to appear. Every night, the same old fear."),
             new Song("Upbeat Track 4", "The Band", "Dancing all night, feeling so good, everything is alright."),
             new Song("Mellow Tune 5", "Solo Singer", "Softly falling snow, watching the garden grow, a peaceful day to know."),
             new Song("Rock Anthem 6", "The Noise Makers", "Loud guitars scream, living out the impossible dream, freedom is the theme.")
     );
+
 
     // Components
     private final JLabel playlistNameLabel;

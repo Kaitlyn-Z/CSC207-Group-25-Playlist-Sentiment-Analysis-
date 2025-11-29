@@ -7,10 +7,10 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addLoginView()
-                .addAnalysisView()
                 .addLoggedInView()
-                .addAnalysisUseCase()
+                .addAnalysisView()
                 .addLoginUseCase()
+                .addAnalysisUseCase()
                 .addLogoutUseCase()
                 .build();
 

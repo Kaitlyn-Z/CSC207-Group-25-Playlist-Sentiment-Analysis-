@@ -16,9 +16,12 @@ public class ViewManagerModel {
         this.state = state;
     }
 
-    // 🔹 AppBuilder: viewManagerModel.firePropertyChange();
+    /**
+     * Notifies listeners (like ViewManager) that the active view name has changed.
+     * ViewManager listens for property name "state", so we must use the same label here.
+     */
     public void firePropertyChange() {
-        support.firePropertyChange("view", null, this.state);
+        support.firePropertyChange("state", null, this.state);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

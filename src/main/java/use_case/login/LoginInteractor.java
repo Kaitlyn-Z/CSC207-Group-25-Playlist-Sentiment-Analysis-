@@ -3,8 +3,6 @@ package use_case.login;
 import data_access.UserDataAccessInterface;
 import entity.User;
 
-import java.time.LocalDateTime;
-
 public class LoginInteractor implements LoginInputBoundary {
 
     private final UserDataAccessInterface userDataAccess;
@@ -25,26 +23,15 @@ public class LoginInteractor implements LoginInputBoundary {
             return;
         }
 
-        // For now: treat value as spotifyId. Later: treat as auth code and delegate to DAO.
-        User user;
-        if (userDataAccess.existsBySpotifyId(value)) {
-            user = userDataAccess.getBySpotifyId(value);
-        } else {
-            user = new User(
-                    value,
-                    "User_" + value,
-                    "access_token_" + value,
-                    "refresh_token_" + value,
-                    LocalDateTime.now().plusHours(1)
+        try {
+            // Delegate the real work (Spotify + DB) to the DAO.
+            User user = userDataAccess.createOrUpdateUserFromSpotifyCode(value);
+
+            presenter.prepareSuccessView(
+                    new LoginOutputData(user.getDisplayName(), user.getSpotifyId())
             );
-            userDataAccess.save(user);
+        } catch (Exception e) {
+            presenter.prepareFailView("Spotify login failed: " + e.getMessage());
         }
-
-        userDataAccess.setCurrentUser(user);
-
-        presenter.prepareSuccessView(
-                new LoginOutputData(user.getDisplayName(), user.getSpotifyId())
-        );
     }
 }
-

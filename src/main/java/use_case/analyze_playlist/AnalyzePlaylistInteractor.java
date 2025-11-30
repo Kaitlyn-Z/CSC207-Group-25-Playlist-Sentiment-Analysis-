@@ -1,9 +1,9 @@
 package use_case.analyze_playlist;
 
 import com.google.gson.JsonArray;
+import entity.Playlist;
 import entity.PlaylistFactory;
 import entity.SentimentResult;
-import entity.Playlist;
 import entity.SentimentResultFactory;
 
 import java.io.IOException;
@@ -22,6 +22,11 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
 
     /**
      * Constructs the interactor with its dependencies.
+     * @param analyzePlaylistPresenter AnalyzePlaylistOutputBoundary
+     * @param playlistFactory PlaylistFactory
+     * @param sentimentDataAccessObject SentimentDataAccessInterface
+     * @param sentimentResultFactory SentimentResultFactory
+     * @param spotifyPlaylistDataAccessObject SpotifyPlaylistDataAccessInterface
      */
     public AnalyzePlaylistInteractor(PlaylistFactory playlistFactory,
                                      SentimentResultFactory sentimentResultFactory,
@@ -37,16 +42,30 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
 
     @Override
     public void execute(AnalyzePlaylistInputData analyzePlaylistInputData) {
-        final Playlist playlist = playlistFactory.create(analyzePlaylistInputData.getPlaylistId(),
+        // Section1: get lyrics from the selected playlist
+        final Playlist playlist = playlistFactory.create(
+                analyzePlaylistInputData.getPlaylistId(),
                 analyzePlaylistInputData.getPlaylistname(),
                 analyzePlaylistInputData.getSongs());
-        final JsonArray songsInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
-        //randomly selected songs' info [{"artist": artistName, "title": titleName, "lyrics": lyrics}, {}...]
+        if (playlist.getSongs().size() == 0) {
+            analyzePlaylistPresenter.prepareFailView("Selected playlist is empty");
+        }
+        else {
+            final JsonArray songsInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
+            // randomly selected songs' info [{"artist": artistName, "title": titleName, "lyrics": lyrics}, {}...]
+            if (songsInfo.size() == 0) {
+                analyzePlaylistPresenter.prepareFailView("No lyrics found");
+            }
+            else {
+                // Section2: get analysis from the lyrics
+                // TODO: write codes here...
+
+            }
+        }
     }
 
+    // TODO: merge your code into execute method (I have made runtimeException for no songs or no lyrics situations, you can find them in DBPlaylistDAO)
 
-
-    //TODO: merge your code into execute method (I have made runtimeException for no songs or no lyrics situations, you can find them in DBPlaylistDAO)
     /**
      * Executes the use case: fetches the sentiment and prepares the output view.
      * @param inputData The input containing the lyrics string.
@@ -80,5 +99,4 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
         }
     }
     */
-
 }

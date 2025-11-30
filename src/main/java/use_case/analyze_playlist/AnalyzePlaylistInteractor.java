@@ -37,11 +37,26 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
 
     @Override
     public void execute(AnalyzePlaylistInputData analyzePlaylistInputData) {
-        final Playlist playlist = playlistFactory.create(analyzePlaylistInputData.getPlaylistId(),
+        //Section1: get lyrics from the selected playlist
+        final Playlist playlist = playlistFactory.create(
+                analyzePlaylistInputData.getPlaylistId(),
                 analyzePlaylistInputData.getPlaylistname(),
                 analyzePlaylistInputData.getSongs());
+        if (playlist.getSongs().size() == 0) {
+            analyzePlaylistPresenter.prepareFailView(("Selected playlist is empty"));
+            return;
+        }
+
         final JsonArray songsInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
         //randomly selected songs' info [{"artist": artistName, "title": titleName, "lyrics": lyrics}, {}...]
+
+        if (songsInfo.size() == 0) {
+            analyzePlaylistPresenter.prepareFailView(("No lyrics found"));
+            return;
+        }
+
+        //Section2: get analysis from the lyrics
+
     }
 
 

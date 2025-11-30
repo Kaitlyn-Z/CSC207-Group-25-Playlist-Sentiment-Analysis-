@@ -6,7 +6,8 @@ import java.beans.PropertyChangeSupport;
 public class ViewManagerModel {
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-    private String state;  // current active view name
+    private String state;
+    // current active view name
 
     public String getState() {
         return state;
@@ -24,6 +25,10 @@ public class ViewManagerModel {
         support.firePropertyChange("state", null, this.state);
     }
 
+    /**
+     * Add property change listener.
+     * @param listener PropertyChangeListener
+     */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }

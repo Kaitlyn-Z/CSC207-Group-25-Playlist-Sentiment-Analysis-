@@ -15,6 +15,17 @@ public class AnalysisController {
     }
 
     /**
+     * Convenience overload for legacy callers that pass raw lyrics as a single string.
+     * This wraps the lyrics into a JsonArray and delegates to the main execute method.
+     * @param lyrics combined lyrics to analyze
+     */
+    public void execute(String lyrics) {
+        JsonArray songs = new JsonArray();
+        songs.add(lyrics);
+        execute("combined-playlist-id", "Combined Playlist", songs);
+    }
+
+    /**
      * Execute method.
      * @param playlistId the unique identifier for the playlist
      * @param playlistName the display name of the playlist

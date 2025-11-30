@@ -1,15 +1,20 @@
 package app;
 
-import data_access.DBPlaylistDataAccessObject;
-import data_access.DBUserDataAccessObject;
-import data_access.DBSentimentResultDataAccessObject;
+import java.awt.CardLayout;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
+import data_access.DBPlaylistDataAccessObject;
+import data_access.DBSentimentResultDataAccessObject;
+import data_access.DBUserDataAccessObject;
+import entity.PlaylistFactory;
 import entity.SentimentResultFactory;
 import entity.UserFactory;
-import entity.PlaylistFactory;
-
-
 import interface_adapter.ViewManagerModel;
+import interface_adapter.analysis.AnalysisController;
+import interface_adapter.analysis.AnalysisPresenter;
 import interface_adapter.analysis.AnalysisViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
@@ -17,42 +22,34 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
-import interface_adapter.analysis.AnalysisController;
-import interface_adapter.analysis.AnalysisPresenter;
-
-import use_case.analyze_playlist.*;
+import use_case.analyze_playlist.AnalyzePlaylistInputBoundary;
+import use_case.analyze_playlist.AnalyzePlaylistInteractor;
+import use_case.analyze_playlist.AnalyzePlaylistOutputBoundary;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
-
-
 import view.AnalysisView;
-import view.ViewManager;
 import view.LoggedInView;
 import view.LoginView;
-
-
-import javax.swing.*;  //JFrame...
-import java.awt.*;  //Color...
-
-
+import view.ViewManager;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
-    final UserFactory userFactory = new UserFactory();
-    final PlaylistFactory playlistFactory = new PlaylistFactory();
-    final SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
-    final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+    private final UserFactory userFactory = new UserFactory();
+    private final PlaylistFactory playlistFactory = new PlaylistFactory();
+    private final SentimentResultFactory sentimentResultFactory = new SentimentResultFactory();
+    private final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    private ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
-    final DBSentimentResultDataAccessObject sentimentDataAccessObject = new DBSentimentResultDataAccessObject(sentimentResultFactory);
-    final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject = new DBPlaylistDataAccessObject(playlistFactory);
-
+    private final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+    private final DBSentimentResultDataAccessObject sentimentDataAccessObject =
+            new DBSentimentResultDataAccessObject(sentimentResultFactory);
+    private final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject =
+            new DBPlaylistDataAccessObject(playlistFactory);
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -61,17 +58,25 @@ public class AppBuilder {
     private LoginView loginView;
     private AnalysisView analysisView;
 
-    public AppBuilder() {cardPanel.setLayout(cardLayout);}
+    public AppBuilder() {
+        cardPanel.setLayout(cardLayout);
+    }
 
-    //Add View to Panel
-    //These are just templates, everyone can change them if u need
-    public AppBuilder addLoginView(){
+    /**
+     * Add login view to panel.
+     * @return this
+     */
+    public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
         loginView = new LoginView(loginViewModel);
         cardPanel.add(loginView, loginView.getViewName());
         return this;
     }
 
+    /**
+     * Add logged in view to panel.
+     * @return this
+     */
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
@@ -79,6 +84,10 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Add analysis view to panel.
+     * @return this
+     */
     public AppBuilder addAnalysisView() {
         analysisViewModel = new AnalysisViewModel();
         analysisView = new AnalysisView(analysisViewModel);
@@ -86,18 +95,24 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Add analysis use case to panel.
+     * @return this
+     */
     public AppBuilder addAnalysisUseCase() {
         final AnalyzePlaylistOutputBoundary analyzePlaylistOutputBoundary = new AnalysisPresenter(analysisViewModel);
 
         final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
-                sentimentResultFactory, sentimentDataAccessObject, analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject);
+                sentimentResultFactory, sentimentDataAccessObject,
+                analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject);
 
-        AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
+        final AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
         analysisView.setAnalysisController(analysisController);
         return this;
     }
-     //TODO: Some of them shouldn't be put here, I have moved Factory and DAO to the front
-/*
+
+    // TODO: Some of them shouldn't be put here, I have moved Factory and DAO to the front
+    /*
         // 2. Create the Presenter (Updates the ViewModel)
         AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(this.analysisViewModel);
 
@@ -118,37 +133,43 @@ public class AppBuilder {
         return this;
     }
 */
-    // Connect UseCase to interface_adapter
-    //These are just templates, everyone can change them if u need
+
+    /**
+     * Add login use case.
+     * @return this
+     */
     public AppBuilder addLoginUseCase() {
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
                 loggedInViewModel, loginViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDataAccessObject, loginOutputBoundary);
 
-        LoginController loginController = new LoginController(loginInteractor);
+        final LoginController loginController = new LoginController(loginInteractor);
         loginView.setLoginController(loginController);
         return this;
     }
 
+    /**
+     * Add logout use case.
+     * @return this
+     */
     public AppBuilder addLogoutUseCase() {
-        LogoutOutputBoundary logoutOutputBoundary =
+        final LogoutOutputBoundary logoutOutputBoundary =
                 new LogoutPresenter(viewManagerModel, loggedInViewModel, loginViewModel);
 
-        LogoutInputBoundary logoutInteractor =
+        final LogoutInputBoundary logoutInteractor =
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
         //  ^ userDataAccessObject now implements LogoutUserDataAccessInterface
 
-        LogoutController logoutController = new LogoutController(logoutInteractor);
+        final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
         return this;
     }
 
-
-    /*
-    public AppBuilder addAnalysisUseCase(){}
+    /**
+     * Build method.
+     * @return User Login JFrame
      */
-
     public JFrame build() {
         final JFrame application = new JFrame("User Login");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -160,6 +181,4 @@ public class AppBuilder {
 
         return application;
     }
-
-
 }

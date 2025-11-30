@@ -12,7 +12,7 @@ public class AnalyzePlaylistInputData {
     private final JsonArray songs;
     private final String playlistname;
 
-    //derive songs from playlist.songs
+    // derive songs from playlist.songs
     public AnalyzePlaylistInputData(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
         this.songs = songs;
@@ -31,8 +31,8 @@ public class AnalyzePlaylistInputData {
         return songs;
     }
 
-    //TODO: Move your codes here (Suggestion: Just Delete them if they are only used in Interactor, since you can derive the lyrics from Interactor now)
-  /*
+    // TODO: Move your codes here (Suggestion: Just Delete them if they are only used in Interactor, since you can derive the lyrics from Interactor now)
+    /*
     private final String combinedLyrics;
 
     /**
@@ -49,5 +49,4 @@ public class AnalyzePlaylistInputData {
     public String getCombinedLyrics() {
         return combinedLyrics;
     }*/
-
 }

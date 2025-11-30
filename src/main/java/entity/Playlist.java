@@ -1,22 +1,23 @@
 package entity;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 /**
- * An entity representing a playlist
+ * An entity representing a playlist.
  */
 public class Playlist {
     private String playlistName;
     private final String playlistId;
-    private JsonArray songs; //expected type: [{"artist": artistName1, "title": songName1}, {"artist":name2, "title": title2}]
+    private JsonArray songs;
+    // expected type: [{"artist": artistName1, "title": songName1}, {"artist":name2, "title": title2}]
     private boolean selected;
 
     public Playlist(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
         this.playlistName = playlistName;
         this.songs = songs;
-        this.selected = false; // default: unselected
+        this.selected = false;
+        // default: unselected
     }
 
     public boolean isSelected() {
@@ -31,10 +32,11 @@ public class Playlist {
         return playlistId;
     }
 
-    public JsonArray getSongs() {return songs;}
+    public JsonArray getSongs() {
+        return songs;
+    }
 
-    public String getPlaylistName() {return playlistName;}
-
-
-
+    public String getPlaylistName() {
+        return playlistName;
+    }
 }

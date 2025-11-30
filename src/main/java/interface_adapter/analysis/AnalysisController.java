@@ -14,19 +14,20 @@ public class AnalysisController {
         this.analyzePlaylistInteractor = analyzePlaylistInteractor;
     }
 
+    /**
+     * Execute method.
+     * @param playlistId the unique identifier for the playlist
+     * @param playlistName the display name of the playlist
+     * @param songs the list of songs contained in the playlist
+     */
     public void execute(String playlistId, String playlistName, JsonArray songs) {
         final AnalyzePlaylistInputData analyzePlaylistInputData = new AnalyzePlaylistInputData(playlistId, playlistName, songs);
 
         analyzePlaylistInteractor.execute(analyzePlaylistInputData);
     }
 
-
-
-
-
-
-//TODO: Move codes (Suggestion: part 1 should be put in Presenter (you can check ca-lab), others should be deleted
-/*
+    // TODO: Move codes (Suggestion: part 1 should be put in Presenter (you can check ca-lab), others should be deleted
+    /*
     private final AnalysisViewModel analysisViewModel;
 
     public AnalysisController(

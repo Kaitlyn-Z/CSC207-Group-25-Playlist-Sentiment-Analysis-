@@ -227,11 +227,11 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
      * Handles button clicks.
      * @param e the ActionEvent to react to
      */
-    //TODO: Now deriving lyrics and analysis are merged together, action performed should be moved to loggedin view,
-    //TODO: I have written a button for analyzing and a method analyzeSentiments.addActionListener(which is a lambda type) there,
-    //TODO: lambda type has combined addactionlistener with actionperformed together
-    //TODO: So you can consider modifying codes of analyzeSentiments.addActionListener
-    //TODO: But I feel what I wrote is the same thing as yours, just change some name
+    // TODO: Now deriving lyrics and analysis are merged together, action performed should be moved to loggedin view,
+    // TODO: I have written a button for analyzing and a method analyzeSentiments.addActionListener(which is a lambda type) there,
+    // TODO: lambda type has combined addactionlistener with actionperformed together
+    // TODO: So you can consider modifying codes of analyzeSentiments.addActionListener
+    // TODO: But I feel what I wrote is the same thing as yours, just change some name
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(analyzeButton)) {

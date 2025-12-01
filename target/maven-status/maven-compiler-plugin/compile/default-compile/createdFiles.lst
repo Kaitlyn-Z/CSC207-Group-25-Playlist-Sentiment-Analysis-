@@ -3,6 +3,7 @@ interface_adapter\analysis\AnalysisController.class
 interface_adapter\analysis\AnalysisState.class
 use_case\analyze_playlist\SpotifyPlaylistDataAccessInterface.class
 app\Main.class
+data_access\AnalysisStatsDataAccessObject$1.class
 interface_adapter\analysis\AnalysisPresenter.class
 interface_adapter\logged_in\LoggedInViewModel$State.class
 use_case\login\LoginOutputBoundary.class
@@ -42,6 +43,7 @@ data_access\DBSentimentResultDataAccessObject.class
 use_case\login\LoginInputBoundary.class
 interface_adapter\login\LoginPresenter.class
 use_case\logout\LogoutInputBoundary.class
+data_access\AnalysisStatsDataAccessObject.class
 interface_adapter\logged_in\LoggedInController.class
 use_case\login\LoginUserDataAccessInterface.class
 use_case\login\LoginOutputData.class

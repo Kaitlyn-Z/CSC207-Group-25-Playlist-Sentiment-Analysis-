@@ -4,6 +4,8 @@ import entity.Playlist;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisState;
 import interface_adapter.analysis.AnalysisViewModel;
+import interface_adapter.ViewManagerModel; // Added import
+import interface_adapter.logged_in.LoggedInViewModel; // Added import
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,13 +48,20 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     // Dependencies
     private AnalysisController analysisController;
     private final AnalysisViewModel analysisViewModel;
+    private final ViewManagerModel viewManagerModel; // New field
+    private final LoggedInViewModel loggedInViewModel; // New field
 
     private final JButton analyzeButton;
+    private final JButton backButton; // New button
     private final SentimentPanel sentimentPanel = new SentimentPanel();
 
-    public AnalysisView(AnalysisViewModel analysisViewModel) {
+    public AnalysisView(AnalysisViewModel analysisViewModel,
+                        ViewManagerModel viewManagerModel,
+                        LoggedInViewModel loggedInViewModel) { // Modified constructor signature
         this.analysisViewModel = analysisViewModel;
         this.analysisViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel = viewManagerModel; // Initialize new field
+        this.loggedInViewModel = loggedInViewModel; // Initialize new field
 
         // Initialize new components
         this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
@@ -116,13 +125,28 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         inputPanel.add(listContainer, BorderLayout.CENTER);
 
+        // Initialize the "Back" button
+        this.backButton = new JButton("Back");
+        
         // Button setup
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(analyzeButton);
+        buttonPanel.add(backButton); // Add the back button
         inputPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Attach action listener to this class instance
         analyzeButton.addActionListener(this);
+        
+        // Attach action listener to the back button
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource().equals(backButton)) {
+                    viewManagerModel.setState(LoggedInView.VIEW_NAME);
+                    viewManagerModel.firePropertyChange();
+                }
+            }
+        });
 
         // --- 3. Visualization Panel ---
         // SentimentPanel is already initialized

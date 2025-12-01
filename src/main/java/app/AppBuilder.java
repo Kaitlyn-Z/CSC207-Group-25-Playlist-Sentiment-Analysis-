@@ -50,6 +50,8 @@ public class AppBuilder {
             new DBSentimentResultDataAccessObject(sentimentResultFactory);
     private final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject =
             new DBPlaylistDataAccessObject(playlistFactory);
+    private final data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject =
+            new data_access.AnalysisStatsDataAccessObject("analysis_stats.json"); // New DAO
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -104,35 +106,13 @@ public class AppBuilder {
 
         final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
                 sentimentResultFactory, sentimentDataAccessObject,
-                analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject);
+                analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject,
+                analysisStatsDataAccessObject); // New parameter
 
         final AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
         analysisView.setAnalysisController(analysisController);
         return this;
     }
-
-    // TODO: Some of them shouldn't be put here, I have moved Factory and DAO to the front
-    /*
-        // 2. Create the Presenter (Updates the ViewModel)
-        AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(this.analysisViewModel);
-
-        // 3. Create the Interactor (The business logic)
-        AnalyzePlaylistInputBoundary interactor = new AnalyzePlaylistInteractor(dao, presenter);
-
-        // 4. Create the Controller (The component the View calls)
-        AnalysisController controller = new AnalysisController(interactor, this.analysisViewModel);
-
-        // 5. Inject the Controller into the View (Completing the cycle)
-        // This setter call is crucial now that the controller is no longer passed in the constructor.
-        if (this.analysisView != null) {
-            this.analysisView.setAnalysisController(controller); // <-- Controller is added here
-        } else {
-            System.err.println("Error: AnalysisView must be added before its use case is wired.");
-        }
-
-        return this;
-    }
-*/
 
     /**
      * Add login use case.

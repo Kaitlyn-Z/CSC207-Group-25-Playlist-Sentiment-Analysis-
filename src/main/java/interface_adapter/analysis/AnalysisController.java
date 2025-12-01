@@ -35,37 +35,4 @@ public class AnalysisController {
 
         analyzePlaylistInteractor.execute(analyzePlaylistInputData);
     }
-
-    // TODO: Move codes (Suggestion: part 1 should be put in Presenter (you can check ca-lab), others should be deleted
-    /*
-    private final AnalysisViewModel analysisViewModel;
-
-    public AnalysisController(
-            AnalyzePlaylistInputBoundary analyzePlaylistInteractor,
-            AnalysisViewModel analysisViewModel) {
-        this.analyzePlaylistInteractor = analyzePlaylistInteractor;
-        this.analysisViewModel = analysisViewModel;
-    }
-
-    /**
-     * Initiates the sentiment analysis use case.
-     * @param lyrics The text input from the user.
-     */
-
-    /*
-    public void execute(String lyrics) {
-        // 1. Update state to loading
-        AnalysisState state = analysisViewModel.getState();
-        state.setLyrics(lyrics);
-        state.setLoading(true);
-        state.setErrorMessage(null); // Clear previous error
-        analysisViewModel.firePropertyChanged();
-
-        // 2. Prepare Input Data
-        AnalyzePlaylistInputData inputData = new AnalyzePlaylistInputData(lyrics);
-
-        // 3. Execute the Interactor (which runs the API call asynchronously)
-        analyzePlaylistInteractor.execute(inputData);
-    }
-    */
 }

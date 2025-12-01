@@ -32,7 +32,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     // TODO: replace with info from user's spotify account
     private final String PLAYLIST_NAME = "Sample Playlist";
     private final List<Map<String, String>> playlistSongs = List.of(
-            Map.of("title", "Become the Warm Jets", "artist", "Green Day (Mock)", "lyrics", "I walk the lonely road, the only one that I have ever known. Don't know where it goes, but it's home to me and I walk alone."),
+            Map.of("title", "Become the Warm Jets", "artist", "Green Day (Mock)", "lyrics", "I walk the lonely road, the only one that I have ever known."),
             Map.of("title", "Sunshine", "artist", "Artist X", "lyrics", "The sun shines bright, making everything feel right. A smile on my face, winning the race."),
             Map.of("title", "Midnight Rain", "artist", "Artist Y", "lyrics", "Silent streets, a hidden tear. Waiting for the light to appear. Every night, the same old fear."),
             Map.of("title", "Upbeat Track 4", "artist", "The Band", "lyrics", "Dancing all night, feeling so good, everything is alright."),
@@ -48,24 +48,24 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     // Dependencies
     private AnalysisController analysisController;
     private final AnalysisViewModel analysisViewModel;
-    private final ViewManagerModel viewManagerModel; // New field
-    private final LoggedInViewModel loggedInViewModel; // New field
+    private final ViewManagerModel viewManagerModel;
+    private final LoggedInViewModel loggedInViewModel;
 
     private final JButton analyzeButton;
-    private final JButton backButton; // New button
+    private final JButton backButton;
     private final SentimentPanel sentimentPanel = new SentimentPanel();
 
     public AnalysisView(AnalysisViewModel analysisViewModel,
                         ViewManagerModel viewManagerModel,
-                        LoggedInViewModel loggedInViewModel) { // Modified constructor signature
+                        LoggedInViewModel loggedInViewModel) {
         this.analysisViewModel = analysisViewModel;
         this.analysisViewModel.addPropertyChangeListener(this);
-        this.viewManagerModel = viewManagerModel; // Initialize new field
-        this.loggedInViewModel = loggedInViewModel; // Initialize new field
+        this.viewManagerModel = viewManagerModel;
+        this.loggedInViewModel = loggedInViewModel;
 
         // Initialize new components
         this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
-        this.backButton = new JButton("Back"); // Re-initialize back button
+        this.backButton = new JButton("Back");
 
         // Setup JList and its model
         DefaultListModel<Map<String, String>> songListModel = new DefaultListModel<>();
@@ -76,14 +76,14 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         this.songList = new JList<>(songListModel);
         this.songList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         this.songList.setLayoutOrientation(JList.VERTICAL);
-        this.songList.setVisibleRowCount(5); // Show a few rows at a time
+        this.songList.setVisibleRowCount(5);
 
         // NEW: Set the custom renderer for column formatting and separators
         this.songList.setCellRenderer(new SongListCellRenderer());
 
         // Initialize the "Analyze Sentiment" button
         this.analyzeButton = new JButton(AnalysisViewModel.ANALYZE_BUTTON_LABEL);
-        this.setLayout(new BorderLayout(10, 10)); // Set main layout
+        this.setLayout(new BorderLayout(10, 10));
 
         // --- Top Header Panel (Playlist Name and Back Button) ---
         JPanel topHeaderPanel = new JPanel(new BorderLayout());
@@ -95,7 +95,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         backButtonPanel.add(backButton);
         topHeaderPanel.add(backButtonPanel, BorderLayout.EAST);
 
-        // --- 2. Input Panel (Playlist Display - now only song list and analyze button) ---
+        // --- 2. Input Panel
         JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -105,7 +105,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         listContainer.add(new JLabel("Songs in Playlist:"));
         listContainer.add(Box.createVerticalStrut(5));
 
-        // NEW: Header Panel for Title and Artist columns
+        // Header Panel for Title and Artist columns
         JPanel headerPanel = new JPanel(new GridLayout(1, 2));
         headerPanel.setMaximumSize(new Dimension(400, 20));
 
@@ -121,17 +121,17 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         headerPanel.add(titleHeader);
         headerPanel.add(artistHeader);
-        headerPanel.setBackground(new Color(230, 230, 230)); // Light background for header
+        headerPanel.setBackground(new Color(230, 230, 230));
         listContainer.add(headerPanel);
 
         // Wrap JList in JScrollPane for scrolling
         JScrollPane scrollPane = new JScrollPane(songList);
-        scrollPane.setPreferredSize(new Dimension(400, 120)); // Fixed height for visibility
+        scrollPane.setPreferredSize(new Dimension(400, 120));
         listContainer.add(scrollPane);
 
         inputPanel.add(listContainer, BorderLayout.CENTER);
 
-        // Button setup (analyzeButton only now)
+        // Button setup
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(analyzeButton);
         inputPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -154,9 +154,9 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         // SentimentPanel is already initialized
 
         // --- Assemble View ---
-        this.add(topHeaderPanel, BorderLayout.NORTH); // New top header
-        this.add(inputPanel, BorderLayout.CENTER);    // inputPanel now in center
-        this.add(sentimentPanel, BorderLayout.SOUTH); // sentimentPanel now in south
+        this.add(topHeaderPanel, BorderLayout.NORTH);
+        this.add(inputPanel, BorderLayout.CENTER);
+        this.add(sentimentPanel, BorderLayout.SOUTH);
 
         // Initial update
         updateViewFromState(analysisViewModel.getState());
@@ -183,8 +183,8 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
             titleLabel = new JLabel();
             artistLabel = new JLabel();
 
-            titleLabel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5)); // Padding
-            artistLabel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5)); // Padding
+            titleLabel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
+            artistLabel.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
             artistLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
             contentPanel.add(titleLabel);
@@ -202,11 +202,11 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         @Override
         public Component getListCellRendererComponent(
-                JList<? extends Map<String, String>> list,         // the list
-                Map<String, String> song,                          // the value to render
-                int index,                          // list index
-                boolean isSelected,                 // selected or not
-                boolean cellHasFocus)               // focused or not
+                JList<? extends Map<String, String>> list,
+                Map<String, String> song,
+                int index,
+                boolean isSelected,
+                boolean cellHasFocus)
         {
             titleLabel.setText(song.get("title"));
             artistLabel.setText(song.get("artist"));
@@ -217,7 +217,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
             // Apply colors
             this.setBackground(background);
-            contentPanel.setBackground(background); // Internal panel must match
+            contentPanel.setBackground(background);
             titleLabel.setBackground(background);
             artistLabel.setBackground(background);
 
@@ -244,11 +244,6 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
      * Handles button clicks.
      * @param e the ActionEvent to react to
      */
-    // TODO: Now deriving lyrics and analysis are merged together, action performed should be moved to loggedin view,
-    // TODO: I have written a button for analyzing and a method analyzeSentiments.addActionListener(which is a lambda type) there,
-    // TODO: lambda type has combined addactionlistener with actionperformed together
-    // TODO: So you can consider modifying codes of analyzeSentiments.addActionListener
-    // TODO: But I feel what I wrote is the same thing as yours, just change some name
     @Override
     public void actionPerformed(ActionEvent e) {
         if (!e.getSource().equals(analyzeButton)) {

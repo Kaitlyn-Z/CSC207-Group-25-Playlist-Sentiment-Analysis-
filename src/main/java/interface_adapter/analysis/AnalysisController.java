@@ -20,9 +20,8 @@ public class AnalysisController {
      * @param lyrics combined lyrics to analyze
      */
     public void execute(String lyrics) {
-        JsonArray songs = new JsonArray();
-        songs.add(lyrics);
-        execute("combined-playlist-id", "Combined Playlist", songs);
+        final AnalyzePlaylistInputData analyzePlaylistInputData = new AnalyzePlaylistInputData(lyrics);
+        analyzePlaylistInteractor.execute(analyzePlaylistInputData);
     }
 
     /**

@@ -8,15 +8,24 @@ import com.google.gson.JsonArray;
  * which in this case is the combined string of song lyrics.
  */
 public class AnalyzePlaylistInputData {
-    private final String playlistId;
-    private final JsonArray songs;
-    private final String playlistname;
+    private String playlistId;
+    private JsonArray songs;
+    private String playlistname;
+    private String combinedLyrics;
 
     // derive songs from playlist.songs
     public AnalyzePlaylistInputData(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
         this.songs = songs;
         this.playlistname = playlistName;
+    }
+
+    /**
+     * Constructs the Input Data object.
+     * @param combinedLyrics The concatenated string of all lyrics to be analyzed.
+     */
+    public AnalyzePlaylistInputData(String combinedLyrics) {
+        this.combinedLyrics = combinedLyrics;
     }
 
     String getPlaylistId() {
@@ -31,22 +40,8 @@ public class AnalyzePlaylistInputData {
         return songs;
     }
 
-    // TODO: Move your codes here (Suggestion: Just Delete them if they are only used in Interactor, since you can derive the lyrics from Interactor now)
-    /*
-    private final String combinedLyrics;
-
-    /**
-     * Constructs the Input Data object.
-     * @param combinedLyrics The concatenated string of all lyrics to be analyzed.
-     */
-
-    /*
-    public AnalyzePlaylistInputData(String combinedLyrics) {
-        this.combinedLyrics = combinedLyrics;
-    }
-
     // Getter
     public String getCombinedLyrics() {
         return combinedLyrics;
-    }*/
+    }
 }

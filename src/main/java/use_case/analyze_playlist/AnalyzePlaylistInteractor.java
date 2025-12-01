@@ -41,37 +41,6 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
     }
 
     @Override
-    public void execute(AnalyzePlaylistInputData analyzePlaylistInputData) {
-        // Section1: get lyrics from the selected playlist
-        final Playlist playlist = playlistFactory.create(
-                analyzePlaylistInputData.getPlaylistId(),
-                analyzePlaylistInputData.getPlaylistname(),
-                analyzePlaylistInputData.getSongs());
-        if (playlist.getSongs().size() == 0) {
-            analyzePlaylistPresenter.prepareFailView("Selected playlist is empty");
-        }
-        else {
-            final JsonArray songsInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
-            // randomly selected songs' info [{"artist": artistName, "title": titleName, "lyrics": lyrics}, {}...]
-            if (songsInfo.size() == 0) {
-                analyzePlaylistPresenter.prepareFailView("No lyrics found");
-            }
-            else {
-                // Section2: get analysis from the lyrics
-                // TODO: write codes here...
-
-            }
-        }
-    }
-
-    // TODO: merge your code into execute method (I have made runtimeException for no songs or no lyrics situations, you can find them in DBPlaylistDAO)
-
-    /**
-     * Executes the use case: fetches the sentiment and prepares the output view.
-     * @param inputData The input containing the lyrics string.
-     */
-    /*
-    @Override
     public void execute(AnalyzePlaylistInputData inputData) {
         String lyrics = inputData.getCombinedLyrics();
 
@@ -98,5 +67,4 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
             analyzePlaylistPresenter.prepareFailView("An unexpected error occurred during analysis: " + e.getMessage());
         }
     }
-    */
 }

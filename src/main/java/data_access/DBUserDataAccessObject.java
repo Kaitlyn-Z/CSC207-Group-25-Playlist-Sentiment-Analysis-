@@ -1,10 +1,16 @@
 package data_access;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import entity.User;
 import entity.UserFactory;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,14 +20,16 @@ import java.util.Map;
  *
  * It implements:
  * - LoginUserDataAccessInterface (for the login use case),
- * - LogoutUserDataAccessInterface (for logout use case).
+ * - LogoutUserDataAccessInterface (for logout use case),
+ * - UserDataAccessInterface (shared data-access boundary).
  *
  * Internally it uses an in-memory Map for users so the app can run
- * without a real DB. You will later plug in real persistence + Spotify.
+ * without a real DB. Spotify is really called in createOrUpdateUserFromSpotifyCode.
  */
 public class DBUserDataAccessObject implements
         LoginUserDataAccessInterface,
-        LogoutUserDataAccessInterface {
+        LogoutUserDataAccessInterface,
+        UserDataAccessInterface {
 
     private final UserFactory userFactory;
 
@@ -72,29 +80,59 @@ public class DBUserDataAccessObject implements
     // ================== Spotify Login Integration Point ==================
 
     /**
-     * For now, this is a stub that *simulates* Spotify login:
-     * it treats the code as the spotifyId and fabricates tokens.
-     * Later, you replace the internals with real Spotify logic.
+     * For this project, we treat the given value as a *Spotify access token*.
+     * We call Spotify's /me endpoint to get the user's profile and either
+     * create or update a User entity in our in-memory store.
      */
     @Override
     public User createOrUpdateUserFromSpotifyCode(String code) throws Exception {
-        // TEMP BEHAVIOUR: treat `code` as the spotifyId
-        final String spotifyId = code;
-        final String displayName = "User_" + code;
-        final String accessToken = "access_token_" + code;
-        final String refreshToken = "refresh_token_" + code;
-        final LocalDateTime expiry = LocalDateTime.now().plusHours(1);
+        // 1) Build HTTP client & request to Spotify's /me endpoint
+        HttpClient client = HttpClient.newHttpClient();
 
-        final User user;
-        if (existsBySpotifyId(spotifyId)) {
-            // Existing user — you could also update tokens here if you want
-            user = getBySpotifyId(spotifyId);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.spotify.com/v1/me"))
+                .header("Authorization", "Bearer " + code)
+                .header("Content-Type", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            // If the token is invalid or expired, Spotify returns 401 or similar
+            throw new RuntimeException(
+                    "Spotify /me call failed with status " + response.statusCode() +
+                            " body: " + response.body()
+            );
         }
-        else {
-            // Create a new user entity using the factory
+
+        // 2) Parse JSON: we need at least `id` and `display_name`
+        Gson gson = new Gson();
+        Map<String, Object> body =
+                gson.fromJson(response.body(), new TypeToken<Map<String, Object>>() {}.getType());
+
+        String spotifyId = (String) body.get("id");
+        String displayName = (String) body.get("display_name");
+        if (displayName == null || displayName.isBlank()) {
+            displayName = "Spotify User " + spotifyId;
+        }
+
+        // 3) Create or update a User entity
+        User user;
+        if (existsBySpotifyId(spotifyId)) {
+            // Existing user in our in-memory "DB"
+            user = getBySpotifyId(spotifyId);
+            // (Optionally update tokens here if needed)
+        } else {
+            // New user: use the factory so other code doesn't depend on User's constructor
+            String accessToken = code;   // we store the raw token for now
+            String refreshToken = null;  // not implemented in this mini flow
+            LocalDateTime expiry = LocalDateTime.now().plusHours(1); // fake expiry
+
             user = userFactory.create(spotifyId, displayName, accessToken, refreshToken, expiry);
         }
 
+        // 4) Save + set current user
         save(user);
         setCurrentUser(user);
 

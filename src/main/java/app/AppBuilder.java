@@ -90,7 +90,7 @@ public class AppBuilder {
      */
     public AppBuilder addAnalysisView() {
         analysisViewModel = new AnalysisViewModel();
-        analysisView = new AnalysisView(analysisViewModel);
+        analysisView = new AnalysisView(analysisViewModel, viewManagerModel, loggedInViewModel); // Modified
         cardPanel.add(analysisView, analysisView.getViewName());
         return this;
     }

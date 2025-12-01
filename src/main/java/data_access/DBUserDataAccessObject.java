@@ -20,16 +20,14 @@ import java.util.Map;
  *
  * It implements:
  * - LoginUserDataAccessInterface (for the login use case),
- * - LogoutUserDataAccessInterface (for logout use case),
- * - UserDataAccessInterface (shared data-access boundary).
+ * - LogoutUserDataAccessInterface (for logout use case).
  *
  * Internally it uses an in-memory Map for users so the app can run
  * without a real DB. Spotify is really called in createOrUpdateUserFromSpotifyCode.
  */
 public class DBUserDataAccessObject implements
         LoginUserDataAccessInterface,
-        LogoutUserDataAccessInterface,
-        UserDataAccessInterface {
+        LogoutUserDataAccessInterface {
 
     private final UserFactory userFactory;
 

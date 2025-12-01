@@ -111,29 +111,6 @@ public class AppBuilder {
         return this;
     }
 
-    // TODO: Some of them shouldn't be put here, I have moved Factory and DAO to the front
-    /*
-        // 2. Create the Presenter (Updates the ViewModel)
-        AnalyzePlaylistOutputBoundary presenter = new AnalysisPresenter(this.analysisViewModel);
-
-        // 3. Create the Interactor (The business logic)
-        AnalyzePlaylistInputBoundary interactor = new AnalyzePlaylistInteractor(dao, presenter);
-
-        // 4. Create the Controller (The component the View calls)
-        AnalysisController controller = new AnalysisController(interactor, this.analysisViewModel);
-
-        // 5. Inject the Controller into the View (Completing the cycle)
-        // This setter call is crucial now that the controller is no longer passed in the constructor.
-        if (this.analysisView != null) {
-            this.analysisView.setAnalysisController(controller); // <-- Controller is added here
-        } else {
-            System.err.println("Error: AnalysisView must be added before its use case is wired.");
-        }
-
-        return this;
-    }
-*/
-
     /**
      * Add login use case.
      * @return this

@@ -9,4 +9,11 @@ public interface SpotifyPlaylistDataAccessInterface {
      * @return A JsonArray of songs' title, artist and lyrics
      */
     JsonArray getLyrics(JsonArray songs);
+
+    /**
+     * Get String of Lyrics.
+     * @param songsInfo JsonArray of songs' information
+     * @return A String of songs' lyrics
+     */
+    String getStringLyrics(JsonArray songsInfo);
 }

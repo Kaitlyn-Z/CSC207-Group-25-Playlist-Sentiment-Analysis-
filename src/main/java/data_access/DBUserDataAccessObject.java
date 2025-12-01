@@ -74,7 +74,6 @@ public class DBUserDataAccessObject implements
     /**
      * For now, this is a stub that *simulates* Spotify login:
      * it treats the code as the spotifyId and fabricates tokens.
-     *
      * Later, you replace the internals with real Spotify logic.
      */
     @Override
@@ -86,11 +85,12 @@ public class DBUserDataAccessObject implements
         final String refreshToken = "refresh_token_" + code;
         final LocalDateTime expiry = LocalDateTime.now().plusHours(1);
 
-        User user;
+        final User user;
         if (existsBySpotifyId(spotifyId)) {
             // Existing user — you could also update tokens here if you want
             user = getBySpotifyId(spotifyId);
-        } else {
+        }
+        else {
             // Create a new user entity using the factory
             user = userFactory.create(spotifyId, displayName, accessToken, refreshToken, expiry);
         }

@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
+import use_case.analyze_playlist.AnalysisStatsDataAccessInterface;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
  * Data access object for persisting and retrieving analysis statistics.
  * This class handles reading from and writing to a JSON file named `analysis_stats.json`.
  */
-public class AnalysisStatsDataAccessObject {
+public class AnalysisStatsDataAccessObject implements AnalysisStatsDataAccessInterface {
 
     private final String filePath;
     private final Gson gson;

@@ -10,38 +10,25 @@ import com.google.gson.JsonArray;
 public class AnalyzePlaylistInputData {
     private String playlistId;
     private JsonArray songs;
-    private String playlistname;
-    private String combinedLyrics;
+    private String playlistName;
 
     // derive songs from playlist.songs
     public AnalyzePlaylistInputData(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
         this.songs = songs;
-        this.playlistname = playlistName;
-    }
-
-    /**
-     * Constructs the Input Data object.
-     * @param combinedLyrics The concatenated string of all lyrics to be analyzed.
-     */
-    public AnalyzePlaylistInputData(String combinedLyrics) {
-        this.combinedLyrics = combinedLyrics;
+        this.playlistName = playlistName;
     }
 
     String getPlaylistId() {
         return playlistId;
     }
 
-    String getPlaylistname() {
-        return playlistname;
+    String getPlaylistName() {
+        return playlistName;
     }
 
     JsonArray getSongs() {
         return songs;
     }
 
-    // Getter
-    public String getCombinedLyrics() {
-        return combinedLyrics;
-    }
 }

@@ -19,59 +19,87 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
     private final PlaylistFactory playlistFactory;
     private final SentimentResultFactory sentimentResultFactory;
     private final SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject;
-    private final data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject; // New field
+    private final AnalysisStatsDataAccessInterface analysisStatsDataAccessObject;
+    // New field
 
     /**
      * Constructs the interactor with its dependencies.
-     * @param analyzePlaylistPresenter AnalyzePlaylistOutputBoundary
-     * @param playlistFactory PlaylistFactory
-     * @param sentimentDataAccessObject SentimentDataAccessInterface
-     * @param sentimentResultFactory SentimentResultFactory
+     *
+     * @param analyzePlaylistPresenter        AnalyzePlaylistOutputBoundary
+     * @param playlistFactory                 PlaylistFactory
+     * @param sentimentDataAccessObject       SentimentDataAccessInterface
+     * @param sentimentResultFactory          SentimentResultFactory
      * @param spotifyPlaylistDataAccessObject SpotifyPlaylistDataAccessInterface
-     * @param analysisStatsDataAccessObject AnalysisStatsDataAccessObject // New parameter
+     * @param analysisStatsDataAccessObject   AnalysisStatsDataAccessObject // New parameter
      */
     public AnalyzePlaylistInteractor(PlaylistFactory playlistFactory,
                                      SentimentResultFactory sentimentResultFactory,
                                      SentimentDataAccessInterface sentimentDataAccessObject,
                                      AnalyzePlaylistOutputBoundary analyzePlaylistPresenter,
                                      SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject,
-                                     data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject) { // Modified constructor
+                                     AnalysisStatsDataAccessInterface analysisStatsDataAccessObject) {
+        // Modified constructor
+
         this.sentimentDataAccessObject = sentimentDataAccessObject;
         this.analyzePlaylistPresenter = analyzePlaylistPresenter;
         this.playlistFactory = playlistFactory;
         this.sentimentResultFactory = sentimentResultFactory;
         this.spotifyPlaylistDataAccessObject = spotifyPlaylistDataAccessObject;
-        this.analysisStatsDataAccessObject = analysisStatsDataAccessObject; // Initialize new field
+        this.analysisStatsDataAccessObject = analysisStatsDataAccessObject;
+        // Initialize new field
     }
 
     @Override
     public void execute(AnalyzePlaylistInputData inputData) {
-        analysisStatsDataAccessObject.incrementAnalyzedPlaylistsCount(); // Increment count every time execute is called
+        final Playlist playlist = playlistFactory.create(
+                inputData.getPlaylistId(),
+                inputData.getPlaylistName(),
+                inputData.getSongs());
 
-        String lyrics = inputData.getCombinedLyrics();
+        if (playlist.getSongs().size() == 0) {
+            analyzePlaylistPresenter.prepareFailView("Selected playlist is empty");
 
-        if (lyrics == null || lyrics.trim().isEmpty()) {
-            analyzePlaylistPresenter.prepareFailView("Please enter some lyrics to analyze.");
-            return;
+        }
+        else {
+
+            final JsonArray songsInfo =
+                    spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
+
+            if (songsInfo.size() == 0) {
+                analyzePlaylistPresenter.prepareFailView("No lyrics found");
+
+            }
+            else {
+                // Section2: do analysis here
+                analysisStatsDataAccessObject.incrementAnalyzedPlaylistsCount();
+                // Increment count every time execute is called
+
+                final String lyrics = spotifyPlaylistDataAccessObject.getStringLyrics(songsInfo);
+
+                try {
+                    final SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
+
+                    final AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(
+                            result.getSentimentWord(),
+                            result.getSentimentExplanation()
+                    );
+
+                    analyzePlaylistPresenter.prepareSuccessView(outputData);
+                    // Removed increment call from here
+
+                }
+                catch (IOException e) {
+                    // Handle API or network errors
+                    analyzePlaylistPresenter.prepareFailView("Failed to connect to the sentiment analysis service: " + e.getMessage());
+                }
+                catch (Exception e) {
+                    // Catch any unexpected runtime errors
+                    analyzePlaylistPresenter.prepareFailView("An unexpected error occurred during analysis: " + e.getMessage());
+                }
+
+            }
         }
 
-        try {
-            SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);
-
-            AnalyzePlaylistOutputData outputData = new AnalyzePlaylistOutputData(
-                    result.getSentimentWord(),
-                    result.getSentimentExplanation()
-            );
-
-            analyzePlaylistPresenter.prepareSuccessView(outputData);
-            // Removed increment call from here
-
-        } catch (IOException e) {
-            // Handle API or network errors
-            analyzePlaylistPresenter.prepareFailView("Failed to connect to the sentiment analysis service: " + e.getMessage());
-        } catch (Exception e) {
-            // Catch any unexpected runtime errors
-            analyzePlaylistPresenter.prepareFailView("An unexpected error occurred during analysis: " + e.getMessage());
-        }
     }
+
 }

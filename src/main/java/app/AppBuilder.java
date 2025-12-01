@@ -51,7 +51,8 @@ public class AppBuilder {
     private final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject =
             new DBPlaylistDataAccessObject(playlistFactory);
     private final data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject =
-            new data_access.AnalysisStatsDataAccessObject("analysis_stats.json"); // New DAO
+            new data_access.AnalysisStatsDataAccessObject("analysis_stats.json");
+    // New DAO
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -92,7 +93,8 @@ public class AppBuilder {
      */
     public AppBuilder addAnalysisView() {
         analysisViewModel = new AnalysisViewModel();
-        analysisView = new AnalysisView(analysisViewModel, viewManagerModel, loggedInViewModel); // Modified
+        analysisView = new AnalysisView(analysisViewModel, viewManagerModel, loggedInViewModel);
+        // Modified
         cardPanel.add(analysisView, analysisView.getViewName());
         return this;
     }
@@ -107,7 +109,8 @@ public class AppBuilder {
         final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
                 sentimentResultFactory, sentimentDataAccessObject,
                 analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject,
-                analysisStatsDataAccessObject); // New parameter
+                analysisStatsDataAccessObject);
+        // New parameter
 
         final AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
         analysisView.setAnalysisController(analysisController);

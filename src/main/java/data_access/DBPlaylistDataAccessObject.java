@@ -81,4 +81,19 @@ public class DBPlaylistDataAccessObject implements SpotifyPlaylistDataAccessInte
         return songsInfo;
     }
 
+    @Override
+    public String getStringLyrics(JsonArray songsInfo) {
+        final StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < songsInfo.size(); i++) {
+            final String lyric = songsInfo.get(i)
+                                .getAsJsonObject()
+                                .get("lyrics")
+                                .getAsString();
+
+            builder.append(lyric).append("\n");
+        }
+        return builder.toString();
+    }
+
 }

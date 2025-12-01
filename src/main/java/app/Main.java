@@ -15,7 +15,7 @@ public class Main {
                 .addAnalysisView()
                 // .addLoginUseCase()
                 .addAnalysisUseCase()
-                // .addLogoutU  seCase()
+                // .addLogoutUseCase()
                 .build();
 
         application.pack();

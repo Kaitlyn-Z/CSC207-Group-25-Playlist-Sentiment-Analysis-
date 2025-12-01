@@ -4,7 +4,6 @@ interface_adapter\analysis\AnalysisState.class
 use_case\analyze_playlist\SpotifyPlaylistDataAccessInterface.class
 app\Main.class
 interface_adapter\analysis\AnalysisPresenter.class
-view\AnalysisView$Song.class
 interface_adapter\logged_in\LoggedInViewModel$State.class
 use_case\login\LoginOutputBoundary.class
 interface_adapter\logout\LogoutController.class

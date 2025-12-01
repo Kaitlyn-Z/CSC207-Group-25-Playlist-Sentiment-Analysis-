@@ -13,6 +13,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 
 /**
  * The main view for viewing the Lyric Sentiment Analysis Summary.
@@ -234,22 +237,38 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     // TODO: But I feel what I wrote is the same thing as yours, just change some name
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(analyzeButton)) {
-            // Check if the controller has been set by the AppBuilder
-            if (this.analysisController != null) {
-                // Combine the lyrics of all songs into a single string
-                String combinedLyrics = playlistSongs.stream()
-                        .map(song -> song.lyrics)
-                        .collect(Collectors.joining("\n---\n")); // Use a separator for the API
-
-                // Delegate the combined lyrics to the controller
-                analysisController.execute(combinedLyrics);
-            } else {
-                // Should not happen in a properly wired application, but good for robustness
-                JOptionPane.showMessageDialog(this, "Application is not fully initialized. Analysis controller is missing.", "System Error", JOptionPane.ERROR_MESSAGE);
-            }
+        if (!e.getSource().equals(analyzeButton)) {
+            return;
         }
+
+        // Make sure the controller is wired
+        if (this.analysisController == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Application is not fully initialized. Analysis controller is missing.",
+                    "System Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Build the JsonArray of songs expected by the use case/DAO
+        // Format: [{ "artist": "...", "title": "..." }, ...]
+        JsonArray songsJson = new JsonArray();
+        for (Song song : playlistSongs) {
+            JsonObject songObj = new JsonObject();
+            songObj.addProperty("artist", song.artist);
+            songObj.addProperty("title", song.title);
+            songsJson.add(songObj);
+        }
+
+        // Temporary demo playlist ID; later this will come from Spotify
+        String playlistId = "demo-playlist-id";
+
+        // Call the controller with (playlistId, playlistName, songsJson)
+        analysisController.execute(playlistId, PLAYLIST_NAME, songsJson);
     }
+
 
     /**
      * Listener for changes in the AnalysisViewModel's state.

@@ -38,12 +38,12 @@ public class DBSentimentResultDataAccessObject implements SentimentDataAccessInt
         this.gson = new Gson();
         this.sentimentResultFactory = resultFactory;
 
-        String key = System.getProperty("gemini.api.key");
+        String key = System.getenv("GEMINI_API_KEY");
 
         if (key == null || key.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "The gemini.api.key system property is not set or is empty. " +
-                            "Please add your API key to the Maven command."
+                    "The GEMINI_API_KEY environment variable is not set or is empty. " +
+                            "Please set the environment variable."
             );
         }
         this.apiKey = key;

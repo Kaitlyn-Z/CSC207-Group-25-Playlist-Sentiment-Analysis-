@@ -4,7 +4,7 @@
         {
             "label": "Run Playlist Sentiment Analyzer",
             "type": "shell",
-            "command": "mvn compile exec:java \"-Dgemini.api.key=${input:geminiApiKey}\"",
+            "command": "mvn compile exec:java",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -14,14 +14,6 @@
                 "panel": "new"
             },
             "problemMatcher": []
-        }
-    ],
-    "inputs": [
-        {
-            "id": "geminiApiKey",
-            "type": "promptString",
-            "description": "Enter your Google AI Studio API Key:",
-            "default": "YOUR_API_KEY_HERE"
         }
     ]
 }

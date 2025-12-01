@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Playlist Sentiment Analyzer",
+            "type": "shell",
+            "command": "mvn compile exec:java \"-Dgemini.api.key=${input:geminiApiKey}\"",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "geminiApiKey",
+            "type": "promptString",
+            "description": "Enter your Google AI Studio API Key:",
+            "default": "YOUR_API_KEY_HERE"
+        }
+    ]
+}

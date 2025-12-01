@@ -2,8 +2,8 @@ package data_access;
 
 import entity.User;
 import entity.UserFactory;
-import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.logout.LogoutUserDataAccessInterface;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -13,17 +13,15 @@ import java.util.Map;
  * Concrete User DAO used by the app right now.
  *
  * It implements:
- * - LoginUserDataAccessInterface (for legacy use-case interfaces),
- * - LogoutUserDataAccessInterface (for logout use case),
- * - UserDataAccessInterface (the main CA boundary for login).
+ * - LoginUserDataAccessInterface (for the login use case),
+ * - LogoutUserDataAccessInterface (for logout use case).
  *
  * Internally it uses an in-memory Map for users so the app can run
- * without a real DB. You can later replace this with real persistence.
+ * without a real DB. You will later plug in real persistence + Spotify.
  */
 public class DBUserDataAccessObject implements
         LoginUserDataAccessInterface,
-        LogoutUserDataAccessInterface,
-        UserDataAccessInterface {
+        LogoutUserDataAccessInterface {
 
     private final UserFactory userFactory;
 
@@ -77,12 +75,11 @@ public class DBUserDataAccessObject implements
      * For now, this is a stub that *simulates* Spotify login:
      * it treats the code as the spotifyId and fabricates tokens.
      *
-     * Later, you replace the internals with calls to the real Spotify helper
-     * from the project blueprint (exchange code, get profile, etc.).
+     * Later, you replace the internals with real Spotify logic.
      */
     @Override
     public User createOrUpdateUserFromSpotifyCode(String code) throws Exception {
-        // 🔴 TEMP BEHAVIOUR: treat `code` as the spotifyId
+        // TEMP BEHAVIOUR: treat `code` as the spotifyId
         final String spotifyId = code;
         final String displayName = "User_" + code;
         final String accessToken = "access_token_" + code;

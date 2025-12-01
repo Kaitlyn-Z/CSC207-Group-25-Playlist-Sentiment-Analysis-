@@ -1,14 +1,19 @@
 package use_case.login;
 
-import data_access.UserDataAccessInterface;
 import entity.User;
 
+/**
+ * LoginInteractor coordinates the login use case.
+ *
+ * It does NOT know about Spotify details; it only calls the
+ * LoginUserDataAccessInterface boundary.
+ */
 public class LoginInteractor implements LoginInputBoundary {
 
-    private final UserDataAccessInterface userDataAccess;
+    private final LoginUserDataAccessInterface userDataAccess;
     private final LoginOutputBoundary presenter;
 
-    public LoginInteractor(UserDataAccessInterface userDataAccess,
+    public LoginInteractor(LoginUserDataAccessInterface userDataAccess,
                            LoginOutputBoundary presenter) {
         this.userDataAccess = userDataAccess;
         this.presenter = presenter;
@@ -24,7 +29,7 @@ public class LoginInteractor implements LoginInputBoundary {
         }
 
         try {
-            // Delegate the real work (Spotify + DB) to the DAO.
+            // Delegate "Spotify + DB" work to the DAO through the boundary.
             User user = userDataAccess.createOrUpdateUserFromSpotifyCode(value);
 
             presenter.prepareSuccessView(

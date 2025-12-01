@@ -24,6 +24,7 @@ data_access\DBSentimentResultDataAccessObject$1.class
 use_case\login\LoginInputData.class
 entity\PlaylistFactory.class
 interface_adapter\login\LoginViewModel$State.class
+view\AnalysisView$1.class
 interface_adapter\ViewManagerModel.class
 interface_adapter\ViewModel.class
 interface_adapter\logged_in\LoggedInState.class

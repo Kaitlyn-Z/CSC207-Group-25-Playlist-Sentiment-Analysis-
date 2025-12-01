@@ -65,6 +65,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         // Initialize new components
         this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
+        this.backButton = new JButton("Back"); // Re-initialize back button
 
         // Setup JList and its model
         DefaultListModel<Map<String, String>> songListModel = new DefaultListModel<>();
@@ -82,16 +83,21 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         // Initialize the "Analyze Sentiment" button
         this.analyzeButton = new JButton(AnalysisViewModel.ANALYZE_BUTTON_LABEL);
-        this.setLayout(new BorderLayout(10, 10));
+        this.setLayout(new BorderLayout(10, 10)); // Set main layout
 
-        // --- 2. Input Panel (Playlist Display) ---
-        JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Display Playlist Name on the top
+        // --- Top Header Panel (Playlist Name and Back Button) ---
+        JPanel topHeaderPanel = new JPanel(new BorderLayout());
         playlistNameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         playlistNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        inputPanel.add(playlistNameLabel, BorderLayout.NORTH);
+        topHeaderPanel.add(playlistNameLabel, BorderLayout.CENTER);
+
+        JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        backButtonPanel.add(backButton);
+        topHeaderPanel.add(backButtonPanel, BorderLayout.EAST);
+
+        // --- 2. Input Panel (Playlist Display - now only song list and analyze button) ---
+        JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Container for the song list, its title, and the new headers
         JPanel listContainer = new JPanel();
@@ -125,16 +131,12 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         inputPanel.add(listContainer, BorderLayout.CENTER);
 
-        // Initialize the "Back" button
-        this.backButton = new JButton("Back");
-        
-        // Button setup
+        // Button setup (analyzeButton only now)
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(analyzeButton);
-        buttonPanel.add(backButton); // Add the back button
         inputPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Attach action listener to this class instance
+        // Attach action listener to this class instance (analyzeButton)
         analyzeButton.addActionListener(this);
         
         // Attach action listener to the back button
@@ -152,8 +154,9 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         // SentimentPanel is already initialized
 
         // --- Assemble View ---
-        this.add(inputPanel, BorderLayout.NORTH);
-        this.add(sentimentPanel, BorderLayout.CENTER);
+        this.add(topHeaderPanel, BorderLayout.NORTH); // New top header
+        this.add(inputPanel, BorderLayout.CENTER);    // inputPanel now in center
+        this.add(sentimentPanel, BorderLayout.SOUTH); // sentimentPanel now in south
 
         // Initial update
         updateViewFromState(analysisViewModel.getState());

@@ -12,7 +12,7 @@ import java.beans.PropertyChangeListener;
 
 public class LoginView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    private static final String VIEW_NAME = "loginView";
+    private static final String VIEW_NAME = "login";
 
     private LoginController loginController;       // AppBuilder will set this
     private final LoginViewModel loginViewModel;

@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -26,34 +27,21 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     public static final String VIEW_NAME = "analysis";
 
     // --- 1. Song Data Structure and Hardcoded Playlist ---
-    private static class Song {
-        String title;
-        String artist;
-        String lyrics;
-
-        public Song(String title, String artist, String lyrics) {
-            this.title = title;
-            this.artist = artist;
-            this.lyrics = lyrics;
-        }
-    }
-
     // TODO: replace with info from user's spotify account
     private final String PLAYLIST_NAME = "Sample Playlist";
-    private final List<Song> playlistSongs = List.of(
-            new Song("Become the Warm Jets", "Green Day (Mock)", "I walk the lonely road, the only one that I have ever known. Don't know where it goes, but it's home to me and I walk alone."),
-            new Song("Sunshine", "Artist X", "The sun shines bright, making everything feel right. A smile on my face, winning the race."),
-            new Song("Midnight Rain", "Artist Y", "Silent streets, a hidden tear. Waiting for the light to appear. Every night, the same old fear."),
-            new Song("Upbeat Track 4", "The Band", "Dancing all night, feeling so good, everything is alright."),
-            new Song("Mellow Tune 5", "Solo Singer", "Softly falling snow, watching the garden grow, a peaceful day to know."),
-            new Song("Rock Anthem 6", "The Noise Makers", "Loud guitars scream, living out the impossible dream, freedom is the theme.")
+    private final List<Map<String, String>> playlistSongs = List.of(
+            Map.of("title", "Become the Warm Jets", "artist", "Green Day (Mock)", "lyrics", "I walk the lonely road, the only one that I have ever known. Don't know where it goes, but it's home to me and I walk alone."),
+            Map.of("title", "Sunshine", "artist", "Artist X", "lyrics", "The sun shines bright, making everything feel right. A smile on my face, winning the race."),
+            Map.of("title", "Midnight Rain", "artist", "Artist Y", "lyrics", "Silent streets, a hidden tear. Waiting for the light to appear. Every night, the same old fear."),
+            Map.of("title", "Upbeat Track 4", "artist", "The Band", "lyrics", "Dancing all night, feeling so good, everything is alright."),
+            Map.of("title", "Mellow Tune 5", "artist", "Solo Singer", "lyrics", "Softly falling snow, watching the garden grow, a peaceful day to know."),
+            Map.of("title", "Rock Anthem 6", "artist", "The Noise Makers", "lyrics", "Loud guitars scream, living out the impossible dream, freedom is the theme.")
     );
 
 
     // Components
     private final JLabel playlistNameLabel;
-    // CHANGED: JList now holds Song objects for better custom rendering
-    private final JList<Song> songList;
+    private final JList<Map<String, String>> songList;
 
     // Dependencies
     private AnalysisController analysisController;
@@ -70,9 +58,8 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
 
         // Setup JList and its model
-        // CHANGED: Model now holds Song objects
-        DefaultListModel<Song> songListModel = new DefaultListModel<>();
-        for (Song song : playlistSongs) {
+        DefaultListModel<Map<String, String>> songListModel = new DefaultListModel<>();
+        for (Map<String, String> song : playlistSongs) {
             songListModel.addElement(song);
         }
 
@@ -152,7 +139,7 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
      * Custom List Cell Renderer to display Title and Artist in two columns
      * and add a line separator below each item.
      */
-    private static class SongListCellRenderer extends JPanel implements ListCellRenderer<Song> {
+    private static class SongListCellRenderer extends JPanel implements ListCellRenderer<Map<String, String>> {
 
         private final JLabel titleLabel;
         private final JLabel artistLabel;
@@ -188,14 +175,14 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
 
         @Override
         public Component getListCellRendererComponent(
-                JList<? extends Song> list,         // the list
-                Song song,                          // the value to render
+                JList<? extends Map<String, String>> list,         // the list
+                Map<String, String> song,                          // the value to render
                 int index,                          // list index
                 boolean isSelected,                 // selected or not
                 boolean cellHasFocus)               // focused or not
         {
-            titleLabel.setText(song.title);
-            artistLabel.setText(song.artist);
+            titleLabel.setText(song.get("title"));
+            artistLabel.setText(song.get("artist"));
 
             // Determine colors
             Color background = isSelected ? list.getSelectionBackground() : list.getBackground();
@@ -252,21 +239,14 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
             return;
         }
 
-        // Build the JsonArray of songs expected by the use case/DAO
-        // Format: [{ "artist": "...", "title": "..." }, ...]
-        JsonArray songsJson = new JsonArray();
-        for (Song song : playlistSongs) {
-            JsonObject songObj = new JsonObject();
-            songObj.addProperty("artist", song.artist);
-            songObj.addProperty("title", song.title);
-            songsJson.add(songObj);
+        // Combine all lyrics into a single string
+        StringBuilder allLyrics = new StringBuilder();
+        for (Map<String, String> song : playlistSongs) {
+            allLyrics.append(song.get("lyrics")).append("\n\n");
         }
-
-        // Temporary demo playlist ID; later this will come from Spotify
-        String playlistId = "demo-playlist-id";
-
-        // Call the controller with (playlistId, playlistName, songsJson)
-        analysisController.execute(playlistId, PLAYLIST_NAME, songsJson);
+        
+        // Call the controller with the combined lyrics string
+        analysisController.execute(allLyrics.toString());
     }
 
 

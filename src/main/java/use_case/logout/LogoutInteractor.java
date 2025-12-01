@@ -13,7 +13,7 @@ public class LogoutInteractor implements LogoutInputBoundary {
 
     @Override
     public void execute() {
-        // 1. clear “current user”
+        // 1. clear "current user"
         userDataAccess.clearCurrentUser();
 
         // 2. create output data

@@ -43,7 +43,7 @@ public class DBSentimentResultDataAccessObject implements SentimentDataAccessInt
         if (key == null || key.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "The GEMINI_API_KEY environment variable is not set or is empty. " +
-                            "Please add your API key to Run Configuration or system environment."
+                            "Please set the environment variable."
             );
         }
         this.apiKey = key;
@@ -159,14 +159,30 @@ public class DBSentimentResultDataAccessObject implements SentimentDataAccessInt
                 throw new IOException("Gemini returned empty or null text content.");
             }
 
-            // Step 3: Convert the generated JSON string to the final sentiment structure
-            Map<String, Object> sentimentData = gson.fromJson(sentimentJsonString, new TypeToken<Map<String, Object>>() {}.getType());
+            // Step 3: Sanitize the response string to remove Markdown fences
+            String cleanedJson = sentimentJsonString.trim();
+            if (cleanedJson.startsWith("```json")) {
+                cleanedJson = cleanedJson.substring(7);
+                if (cleanedJson.endsWith("```")) {
+                    cleanedJson = cleanedJson.substring(0, cleanedJson.length() - 3);
+                }
+            }
+            cleanedJson = cleanedJson.trim(); // Trim again after removing fences
+
+            // Step 4: Convert the generated JSON string to the final sentiment structure
+            Map<String, Object> sentimentData;
+            try {
+                sentimentData = gson.fromJson(cleanedJson, new TypeToken<Map<String, Object>>() {}.getType());
+            } catch (com.google.gson.JsonSyntaxException e) {
+                throw new IOException("Failed to parse the following text as JSON: " + cleanedJson, e);
+            }
+
 
             // Extract new Sentiment fields: sentimentWord and sentimentExplanation
             String sentimentWord = (String) sentimentData.getOrDefault("sentimentWord", "Undetermined");
             String sentimentExplanation = (String) sentimentData.getOrDefault("sentimentExplanation", "No explanation provided.");
 
-            // Step 4: Use the Factory to create the entity
+            // Step 5: Use the Factory to create the entity
             return sentimentResultFactory.create(sentimentWord, sentimentExplanation);
 
         } catch (Exception e) {

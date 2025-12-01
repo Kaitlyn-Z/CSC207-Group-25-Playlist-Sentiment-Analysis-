@@ -50,6 +50,8 @@ public class AppBuilder {
             new DBSentimentResultDataAccessObject(sentimentResultFactory);
     private final DBPlaylistDataAccessObject spotifyPlaylistDataAccessObject =
             new DBPlaylistDataAccessObject(playlistFactory);
+    private final data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject =
+            new data_access.AnalysisStatsDataAccessObject("analysis_stats.json"); // New DAO
 
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
@@ -104,7 +106,8 @@ public class AppBuilder {
 
         final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
                 sentimentResultFactory, sentimentDataAccessObject,
-                analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject);
+                analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject,
+                analysisStatsDataAccessObject); // New parameter
 
         final AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
         analysisView.setAnalysisController(analysisController);

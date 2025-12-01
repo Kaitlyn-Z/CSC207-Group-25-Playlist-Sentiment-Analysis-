@@ -19,6 +19,7 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
     private final PlaylistFactory playlistFactory;
     private final SentimentResultFactory sentimentResultFactory;
     private final SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject;
+    private final data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject; // New field
 
     /**
      * Constructs the interactor with its dependencies.
@@ -27,21 +28,26 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
      * @param sentimentDataAccessObject SentimentDataAccessInterface
      * @param sentimentResultFactory SentimentResultFactory
      * @param spotifyPlaylistDataAccessObject SpotifyPlaylistDataAccessInterface
+     * @param analysisStatsDataAccessObject AnalysisStatsDataAccessObject // New parameter
      */
     public AnalyzePlaylistInteractor(PlaylistFactory playlistFactory,
                                      SentimentResultFactory sentimentResultFactory,
                                      SentimentDataAccessInterface sentimentDataAccessObject,
                                      AnalyzePlaylistOutputBoundary analyzePlaylistPresenter,
-                                     SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject) {
+                                     SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject,
+                                     data_access.AnalysisStatsDataAccessObject analysisStatsDataAccessObject) { // Modified constructor
         this.sentimentDataAccessObject = sentimentDataAccessObject;
         this.analyzePlaylistPresenter = analyzePlaylistPresenter;
         this.playlistFactory = playlistFactory;
         this.sentimentResultFactory = sentimentResultFactory;
         this.spotifyPlaylistDataAccessObject = spotifyPlaylistDataAccessObject;
+        this.analysisStatsDataAccessObject = analysisStatsDataAccessObject; // Initialize new field
     }
 
     @Override
     public void execute(AnalyzePlaylistInputData inputData) {
+        analysisStatsDataAccessObject.incrementAnalyzedPlaylistsCount(); // Increment count every time execute is called
+
         String lyrics = inputData.getCombinedLyrics();
 
         if (lyrics == null || lyrics.trim().isEmpty()) {
@@ -58,6 +64,7 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
             );
 
             analyzePlaylistPresenter.prepareSuccessView(outputData);
+            // Removed increment call from here
 
         } catch (IOException e) {
             // Handle API or network errors

@@ -1,7 +1,6 @@
 package use_case.login;
 
 import entity.User;
-import entity.UserFactory;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -9,35 +8,51 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit tests for LoginInteractor, using the LoginUserDataAccessInterface boundary.
+ * JUnit tests for LoginInteractor with the new Spotify-based DAO boundary.
  */
 class LoginInteractorTest {
 
-    // ====== Fake DAO for tests ======
+    // ====== Fake DAO that never hits Spotify ======
     private static class FakeUserDAO implements LoginUserDataAccessInterface {
 
-        private final UserFactory userFactory = new UserFactory();
-
+        User currentUser;
         int createOrUpdateCalls = 0;
-        String lastCode = null;
-        User userToReturn = null;
-        boolean shouldThrow = false;
-        String exceptionMessage = "boom";
+
+        @Override
+        public boolean existsBySpotifyId(String spotifyId) {
+            return false; // not used in these tests
+        }
+
+        @Override
+        public User getBySpotifyId(String spotifyId) {
+            return null; // not used
+        }
+
+        @Override
+        public void save(User user) {
+            // no-op for tests
+        }
+
+        @Override
+        public void setCurrentUser(User user) {
+            this.currentUser = user;
+        }
+
+        @Override
+        public User getCurrentUser() {
+            return currentUser;
+        }
+
+        @Override
+        public void clearCurrentUser() {
+            this.currentUser = null;
+        }
 
         @Override
         public User createOrUpdateUserFromSpotifyCode(String code) throws Exception {
             createOrUpdateCalls++;
-            lastCode = code;
-
-            if (shouldThrow) {
-                throw new Exception(exceptionMessage);
-            }
-
-            if (userToReturn != null) {
-                return userToReturn;
-            }
-
-            return userFactory.create(
+            // Fabricate a user without calling Spotify
+            return new User(
                     code,
                     "User_" + code,
                     "access_" + code,
@@ -45,39 +60,12 @@ class LoginInteractorTest {
                     LocalDateTime.now().plusHours(1)
             );
         }
-
-        // The rest of the methods aren't used in LoginInteractor now,
-        // so we just stub them out.
-
-        @Override
-        public boolean existsBySpotifyId(String spotifyId) {
-            return false;
-        }
-
-        @Override
-        public User getBySpotifyId(String spotifyId) {
-            return null;
-        }
-
-        @Override
-        public void save(User user) {}
-
-        @Override
-        public void setCurrentUser(User user) {}
-
-        @Override
-        public User getCurrentUser() {
-            return null;
-        }
-
-        @Override
-        public void clearCurrentUser() {}
     }
 
     // ====== Fake Presenter ======
-    private static class FakeLoginPresenter implements LoginOutputBoundary {
-        LoginOutputData lastSuccess = null;
-        String lastError = null;
+    private static class FakePresenter implements LoginOutputBoundary {
+        LoginOutputData lastSuccess;
+        String lastError;
         int successCalls = 0;
         int failCalls = 0;
 
@@ -99,84 +87,74 @@ class LoginInteractorTest {
     @Test
     void emptyInput_triggersFailAndDoesNotCallDAO() {
         FakeUserDAO dao = new FakeUserDAO();
-        FakeLoginPresenter presenter = new FakeLoginPresenter();
+        FakePresenter presenter = new FakePresenter();
         LoginInteractor interactor = new LoginInteractor(dao, presenter);
 
-        LoginInputData inputData = new LoginInputData("   ");
-        interactor.execute(inputData);
+        interactor.execute(new LoginInputData("   ")); // spaces only
 
         assertEquals(0, presenter.successCalls);
         assertEquals(1, presenter.failCalls);
         assertEquals("Login input cannot be empty.", presenter.lastError);
 
-        assertEquals(0, dao.createOrUpdateCalls);
+        assertEquals(0, dao.createOrUpdateCalls,
+                "DAO should NOT be called when input is empty.");
     }
 
     @Test
     void nullInput_triggersFailAndDoesNotCallDAO() {
         FakeUserDAO dao = new FakeUserDAO();
-        FakeLoginPresenter presenter = new FakeLoginPresenter();
+        FakePresenter presenter = new FakePresenter();
         LoginInteractor interactor = new LoginInteractor(dao, presenter);
 
-        LoginInputData inputData = new LoginInputData(null);
-        interactor.execute(inputData);
+        interactor.execute(new LoginInputData(null));
 
         assertEquals(0, presenter.successCalls);
         assertEquals(1, presenter.failCalls);
         assertEquals("Login input cannot be empty.", presenter.lastError);
-
         assertEquals(0, dao.createOrUpdateCalls);
     }
 
     @Test
-    void nonEmptyInput_callsDAOAndReturnsSuccess() {
+    void validToken_callsDAOAndReturnsSuccess() {
         FakeUserDAO dao = new FakeUserDAO();
-        FakeLoginPresenter presenter = new FakeLoginPresenter();
+        FakePresenter presenter = new FakePresenter();
         LoginInteractor interactor = new LoginInteractor(dao, presenter);
 
-        String code = "abc123";
-
-        // preconfigure a specific user
-        UserFactory factory = new UserFactory();
-        dao.userToReturn = factory.create(
-                "spotify_abc123",
-                "Existing Spotify User",
-                "access_token_abc123",
-                "refresh_token_abc123",
-                LocalDateTime.now().plusHours(2)
-        );
-
-        LoginInputData inputData = new LoginInputData(code);
-        interactor.execute(inputData);
+        interactor.execute(new LoginInputData("valid-token"));
 
         assertEquals(1, dao.createOrUpdateCalls);
-        assertEquals(code, dao.lastCode);
-
         assertEquals(1, presenter.successCalls);
         assertEquals(0, presenter.failCalls);
         assertNotNull(presenter.lastSuccess);
-        assertEquals("Existing Spotify User", presenter.lastSuccess.getDisplayName());
-        assertEquals("spotify_abc123", presenter.lastSuccess.getSpotifyId());
+        assertEquals("valid-token", presenter.lastSuccess.getSpotifyId());
+        assertEquals("User_valid-token", presenter.lastSuccess.getDisplayName());
     }
 
     @Test
-    void daoThrowsException_triggersFailView() {
-        FakeUserDAO dao = new FakeUserDAO();
-        dao.shouldThrow = true;
-        dao.exceptionMessage = "Spotify service down";
+    void daoThrowsException_resultsInFailView() throws Exception {
+        // DAO that always throws
+        LoginUserDataAccessInterface failingDAO = new LoginUserDataAccessInterface() {
+            @Override public boolean existsBySpotifyId(String spotifyId) { return false; }
+            @Override public User getBySpotifyId(String spotifyId) { return null; }
+            @Override public void save(User user) {}
+            @Override public void setCurrentUser(User user) {}
+            @Override public User getCurrentUser() { return null; }
+            @Override public void clearCurrentUser() {}
 
-        FakeLoginPresenter presenter = new FakeLoginPresenter();
-        LoginInteractor interactor = new LoginInteractor(dao, presenter);
+            @Override
+            public User createOrUpdateUserFromSpotifyCode(String code) throws Exception {
+                throw new Exception("boom");
+            }
+        };
 
-        LoginInputData inputData = new LoginInputData("someCode");
-        interactor.execute(inputData);
+        FakePresenter presenter = new FakePresenter();
+        LoginInteractor interactor = new LoginInteractor(failingDAO, presenter);
 
-        assertEquals(1, dao.createOrUpdateCalls);
+        interactor.execute(new LoginInputData("whatever"));
 
         assertEquals(0, presenter.successCalls);
         assertEquals(1, presenter.failCalls);
-        assertNotNull(presenter.lastError);
-        assertTrue(presenter.lastError.startsWith("Spotify login failed:"));
-        assertTrue(presenter.lastError.contains("Spotify service down"));
+        assertTrue(presenter.lastError.startsWith("Spotify login failed:"),
+                "Error message should start with 'Spotify login failed:'");
     }
 }

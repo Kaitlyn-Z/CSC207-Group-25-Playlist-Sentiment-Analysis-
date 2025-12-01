@@ -26,7 +26,7 @@ public interface LoginUserDataAccessInterface {
      * Uses Spotify (and optionally the DB) to log in with an auth code / token.
      * Returns the up-to-date User entity.
      *
-     * In production, this will hit Spotify + DB.
+     * In production, this hits Spotify + DB.
      * In tests, we fake it.
      */
     User createOrUpdateUserFromSpotifyCode(String code) throws Exception;

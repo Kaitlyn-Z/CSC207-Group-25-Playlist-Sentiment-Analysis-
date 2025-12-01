@@ -1,5 +1,4 @@
 view\LoggedInView.class
-data_access\UserDataAccessInterface.class
 interface_adapter\analysis\AnalysisController.class
 interface_adapter\analysis\AnalysisState.class
 use_case\analyze_playlist\SpotifyPlaylistDataAccessInterface.class
@@ -38,7 +37,6 @@ use_case\logout\LogoutUserDataAccessInterface.class
 entity\Playlist.class
 use_case\logout\LogoutInteractor.class
 view\LabelTextPanel.class
-data_access\SpotifyUserDataAccessObject.class
 use_case\analyze_playlist\AnalyzePlaylistInputData.class
 data_access\DBSentimentResultDataAccessObject.class
 use_case\login\LoginInputBoundary.class

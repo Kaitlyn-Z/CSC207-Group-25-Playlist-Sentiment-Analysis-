@@ -3,8 +3,6 @@ C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\data_access\DBPlaylistDataAccessObject.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\data_access\DBSentimentResultDataAccessObject.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\data_access\DBUserDataAccessObject.java
-C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\data_access\SpotifyUserDataAccessObject.java
-C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\data_access\UserDataAccessInterface.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\entity\Playlist.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\entity\PlaylistFactory.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\entity\SentimentResult.java

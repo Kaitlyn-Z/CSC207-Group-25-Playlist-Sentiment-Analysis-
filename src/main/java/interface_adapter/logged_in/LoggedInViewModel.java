@@ -1,13 +1,21 @@
 package interface_adapter.logged_in;
 
+import entity.Playlist;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import view.LoggedInView;
+import java.util.Collections;
+import java.util.List;
+
 public class LoggedInViewModel {
 
     public static class State {
         public String displayName = "";
         public String spotifyId = "";
+
+        // NEW: playlists fetched from Spotify for this user
+        // These are entity.Playlist objects with id, name, and songs JsonArray.
+        public List<Playlist> playlists = Collections.emptyList();
     }
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
@@ -25,6 +33,22 @@ public class LoggedInViewModel {
     public void setSpotifyId(String spotifyId) {
         state.spotifyId = spotifyId;
         support.firePropertyChange("state", null, state);
+    }
+
+    /**
+     * NEW: store the playlists for the currently logged-in user.
+     * This is temporary (in-memory) state, not written to the DB.
+     */
+    public void setPlaylists(List<Playlist> playlists) {
+        state.playlists = playlists;
+        support.firePropertyChange("state", null, state);
+    }
+
+    /**
+     * Convenience getter if you need just the playlists.
+     */
+    public List<Playlist> getPlaylists() {
+        return state.playlists;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

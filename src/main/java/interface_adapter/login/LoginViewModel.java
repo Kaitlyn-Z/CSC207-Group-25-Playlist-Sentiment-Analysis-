@@ -14,7 +14,7 @@ public class LoginViewModel extends ViewModel{
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private State state = new State();
-    public static final String VIEW_NAME = "login";
+    public static final String VIEW_NAME = "loginView";
 
     public LoginViewModel() {
         super(VIEW_NAME);

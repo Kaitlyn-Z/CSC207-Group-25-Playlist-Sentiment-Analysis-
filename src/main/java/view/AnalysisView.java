@@ -33,15 +33,15 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
     }
 
     private void buildUI() {
-        // --- Top Header Content Panel (Playlist Name and Close Button) ---
-        JPanel topHeaderContentPanel = new JPanel(new BorderLayout());
+        // --- Top Header Panel (Playlist Name and Close Button) ---
+        JPanel topHeaderPanel = new JPanel(new BorderLayout());
         playlistNameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         playlistNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        topHeaderContentPanel.add(playlistNameLabel, BorderLayout.CENTER);
+        topHeaderPanel.add(playlistNameLabel, BorderLayout.CENTER);
 
         JPanel closeButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         closeButtonPanel.add(closeButton);
-        topHeaderContentPanel.add(closeButtonPanel, BorderLayout.EAST);
+        topHeaderPanel.add(closeButtonPanel, BorderLayout.EAST);
 
         closeButton.addActionListener(e -> {
             Window window = SwingUtilities.getWindowAncestor(this);
@@ -50,9 +50,9 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // --- Song List Panel (now at the top) ---
-        JPanel songListPanel = new JPanel(new BorderLayout(5, 5));
-        songListPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // --- Center Panel for Song List ---
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel listContainer = new JPanel();
         listContainer.setLayout(new BoxLayout(listContainer, BoxLayout.Y_AXIS));
         listContainer.add(new JLabel("Songs in Playlist:"));
@@ -64,25 +64,21 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         titleHeader.setFont(new Font("SansSerif", Font.BOLD, 12));
         JLabel artistHeader = new JLabel("ARTIST");
         artistHeader.setFont(new Font("SansSerif", Font.BOLD, 12));
+        artistHeader.setHorizontalAlignment(SwingConstants.RIGHT); // Request 1: Align Artist header to the right
         headerPanel.add(titleHeader);
         headerPanel.add(artistHeader);
         listContainer.add(headerPanel);
 
         songList.setCellRenderer(new SongListCellRenderer());
+        songList.setVisibleRowCount(3); // Request 3: Make the list of songs smaller vertically
         JScrollPane scrollPane = new JScrollPane(songList);
         listContainer.add(scrollPane);
-        songListPanel.add(listContainer, BorderLayout.CENTER);
-
-
-        // --- Combine Top Header and Song List into a single NORTH panel ---
-        JPanel northPanel = new JPanel();
-        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
-        northPanel.add(topHeaderContentPanel);
-        northPanel.add(songListPanel);
+        centerPanel.add(listContainer, BorderLayout.CENTER);
 
         // --- Assemble View ---
-        this.add(northPanel, BorderLayout.NORTH);
-        this.add(sentimentPanel, BorderLayout.CENTER);
+        this.add(topHeaderPanel, BorderLayout.NORTH);
+        this.add(centerPanel, BorderLayout.CENTER);
+        this.add(sentimentPanel, BorderLayout.SOUTH);
 
         // Set initial state
         updateViewFromState(this.analysisViewModel.getState());
@@ -98,7 +94,7 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
 
     private void updateViewFromState(AnalysisState state) {
         sentimentPanel.setLoading(state.isLoading());
-        playlistNameLabel.setText(state.getPlaylistName()); // Set name regardless of loading
+        playlistNameLabel.setText(state.getPlaylistName()); // Always show playlist title (part of Request 2)
 
         // Populate song list regardless of loading state
         DefaultListModel<JsonObject> model = (DefaultListModel<JsonObject>) songList.getModel();
@@ -110,7 +106,7 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         }
 
         if (state.isLoading()) {
-            playlistNameLabel.setText("Analyzing..."); // Override name if loading
+            // playlistNameLabel.setText("Analyzing..."); // Request 2: Get rid of "Analyzing..." text
             sentimentPanel.setResult(null); // Clear previous results
         } else {
             // Not loading: update results and handle errors
@@ -131,7 +127,7 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         public SongListCellRenderer() {
             setLayout(new BorderLayout());
             add(titleLabel, BorderLayout.WEST);
-            add(artistLabel, BorderLayout.EAST);
+            add(artistLabel, BorderLayout.EAST); // Aligned to EAST in cell renderer
             setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
         }
 

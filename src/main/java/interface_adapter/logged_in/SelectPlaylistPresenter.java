@@ -13,7 +13,7 @@ public class SelectPlaylistPresenter implements SelectPlaylistOutputBoundary {
 
     @Override
     public void prepareSuccessView(SelectPlaylistOutputData outputData) {
-        var playlist = outputData.getSelectedPlaylist();
+        final var playlist = outputData.getSelectedPlaylist();
 
         loggedInViewModel.setSelectedPlaylist(playlist);
         loggedInViewModel.setStatusMessage(outputData.getStatusMessage());

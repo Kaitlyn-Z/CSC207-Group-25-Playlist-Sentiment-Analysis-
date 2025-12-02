@@ -1,0 +1,82 @@
+-------------------------------------------------------------------------------
+Test set: use_case.analyze_playlist.SentimentDataAccessObjectTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 0.504 s <<< FAILURE! -- in use_case.analyze_playlist.SentimentDataAccessObjectTest
+use_case.analyze_playlist.SentimentDataAccessObjectTest.constructor_noApiKeySet_throwsIllegalArgumentException -- Time elapsed: 0.042 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+use_case.analyze_playlist.SentimentDataAccessObjectTest.analyzeSentiment_NoCandidatesInApiResponse_ThrowsIOException -- Time elapsed: 0.199 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+use_case.analyze_playlist.SentimentDataAccessObjectTest.analyzeSentiment_MalformedApiResponse_ThrowsIOException -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+use_case.analyze_playlist.SentimentDataAccessObjectTest.analyzeSentiment_EmptyLyrics_ThrowsIOException -- Time elapsed: 0.014 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+use_case.analyze_playlist.SentimentDataAccessObjectTest.analyzeSentiment_ApiError_ThrowsIOException -- Time elapsed: 0 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+use_case.analyze_playlist.SentimentDataAccessObjectTest.analyzeSentiment_Success -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+	The constructor DBSentimentResultDataAccessObject(SentimentResultFactory) is undefined
+
+	at use_case.analyze_playlist.SentimentDataAccessObjectTest.<init>(SentimentDataAccessObjectTest.java:51)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+

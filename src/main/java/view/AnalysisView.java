@@ -1,11 +1,14 @@
 package view;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import entity.Playlist;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisState;
 import interface_adapter.analysis.AnalysisViewModel;
 import interface_adapter.ViewManagerModel; // Added import
 import interface_adapter.logged_in.LoggedInViewModel; // Added import
+import view.LoggedInView; // Added import
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,9 +18,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 
 /**
@@ -25,8 +25,6 @@ import com.google.gson.JsonObject;
  * It observes the AnalysisViewModel for state changes and updates the UI accordingly.
  */
 public class AnalysisView extends JPanel implements ActionListener, PropertyChangeListener {
-
-    public static final String VIEW_NAME = "analysis";
 
     // --- 1. Song Data Structure and Hardcoded Playlist ---
     // TODO: replace with info from user's spotify account
@@ -39,7 +37,9 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
             Map.of("title", "Mellow Tune 5", "artist", "Solo Singer", "lyrics", "Softly falling snow, watching the garden grow, a peaceful day to know."),
             Map.of("title", "Rock Anthem 6", "artist", "The Noise Makers", "lyrics", "Loud guitars scream, living out the impossible dream, freedom is the theme.")
     );
+    private final Playlist playlist;
 
+    private static final String VIEW_NAME = "analysis";
 
     // Components
     private final JLabel playlistNameLabel;
@@ -55,23 +55,66 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
     private final JButton backButton;
     private final SentimentPanel sentimentPanel = new SentimentPanel();
 
-    public AnalysisView(AnalysisViewModel analysisViewModel,
-                        ViewManagerModel viewManagerModel,
-                        LoggedInViewModel loggedInViewModel) {
-        this.analysisViewModel = analysisViewModel;
-        this.analysisViewModel.addPropertyChangeListener(this);
-        this.viewManagerModel = viewManagerModel;
-        this.loggedInViewModel = loggedInViewModel;
+    // 🔹 AppBuilder: loginView.getViewName() and LoginView.getViewName()
+    public static String getViewName() {
+        return VIEW_NAME;
+    }
 
-        // Initialize new components
-        this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
-        this.backButton = new JButton("Back");
+        public AnalysisView(AnalysisViewModel analysisViewModel,
 
-        // Setup JList and its model
-        DefaultListModel<Map<String, String>> songListModel = new DefaultListModel<>();
-        for (Map<String, String> song : playlistSongs) {
-            songListModel.addElement(song);
-        }
+                            ViewManagerModel viewManagerModel,
+
+                            LoggedInViewModel loggedInViewModel) {
+
+            this.analysisViewModel = analysisViewModel;
+
+            this.analysisViewModel.addPropertyChangeListener(this);
+
+            this.viewManagerModel = viewManagerModel;
+
+            this.loggedInViewModel = loggedInViewModel;
+
+    
+
+            // Create JsonArray for Playlist entity
+
+            JsonArray songsJsonArray = new JsonArray();
+
+            for (Map<String, String> song : playlistSongs) {
+
+                JsonObject songJson = new JsonObject();
+
+                songJson.addProperty("title", song.get("title"));
+
+                songJson.addProperty("artist", song.get("artist"));
+
+                songsJsonArray.add(songJson);
+
+            }
+
+            this.playlist = new Playlist("sample-id", PLAYLIST_NAME, songsJsonArray);
+
+    
+
+    
+
+            // Initialize new components
+
+            this.playlistNameLabel = new JLabel(PLAYLIST_NAME);
+
+            this.backButton = new JButton("Back");
+
+    
+
+            // Setup JList and its model
+
+            DefaultListModel<Map<String, String>> songListModel = new DefaultListModel<>();
+
+            for (Map<String, String> song : playlistSongs) {
+
+                songListModel.addElement(song);
+
+            }
 
         this.songList = new JList<>(songListModel);
         this.songList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -261,14 +304,9 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
             return;
         }
 
-        // Combine all lyrics into a single string
-        StringBuilder allLyrics = new StringBuilder();
-        for (Map<String, String> song : playlistSongs) {
-            allLyrics.append(song.get("lyrics")).append("\n\n");
-        }
-        
-        // Call the controller with the combined lyrics string
-        analysisController.execute(allLyrics.toString());
+        // Call the controller with the playlist info and songs JsonArray (without lyrics)
+        // The backend interactor is responsible for fetching the lyrics based on song title and artist.
+        analysisController.execute(playlist.getPlaylistId(), playlist.getPlaylistName(), playlist.getSongs());
     }
 
 
@@ -310,7 +348,4 @@ public class AnalysisView extends JPanel implements ActionListener, PropertyChan
         }
     }
 
-    public String getViewName() {
-        return VIEW_NAME;
-    }
 }

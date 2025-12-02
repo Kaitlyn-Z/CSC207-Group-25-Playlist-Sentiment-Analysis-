@@ -26,6 +26,7 @@ C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\interface_adapter\logout\LogoutPresenter.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\interface_adapter\ViewManagerModel.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\interface_adapter\ViewModel.java
+C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\use_case\analyze_playlist\AnalysisStatsDataAccessInterface.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\use_case\analyze_playlist\AnalyzePlaylistInputBoundary.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\use_case\analyze_playlist\AnalyzePlaylistInputData.java
 C:\Users\catsr\CSC207\CSC207-Group-25-Playlist-Sentiment-Analysis-\src\main\java\use_case\analyze_playlist\AnalyzePlaylistInteractor.java

@@ -74,7 +74,7 @@ class SelectPlaylistInteractorTest {
 
         JsonArray songs = new JsonArray();
         Playlist playlist = new Playlist("123", "MyPlaylist", songs);
-        viewModel.setPlaylists(java.util.List.of(playlist)); // 列表非空，但不匹配
+        viewModel.setPlaylists(java.util.List.of(playlist));
 
         SelectPlaylistOutputBoundary failurePresenter = new SelectPlaylistOutputBoundary() {
             @Override
@@ -92,7 +92,7 @@ class SelectPlaylistInteractorTest {
                 new SelectPlaylistInteractor(viewModel, failurePresenter);
 
         SelectPlaylistInputData inputData =
-                new SelectPlaylistInputData("999", "WrongName"); // 不匹配
+                new SelectPlaylistInputData("999", "WrongName");
 
         interactor.execute(inputData);
     }

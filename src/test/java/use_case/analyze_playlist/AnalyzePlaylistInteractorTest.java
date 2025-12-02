@@ -71,13 +71,31 @@ class AnalyzePlaylistInteractorTest {
                 }
             };
 
+            AnalysisStatsDataAccessInterface mockStatsDAO = new AnalysisStatsDataAccessInterface() {
+                @Override
+                public Map<String, Integer> loadStats() {
+                    return new HashMap<>(Map.of("analyzedPlaylistsCount", 0));
+                }
+
+                @Override
+                public void saveStats(Map<String, Integer> stats) {}
+
+                @Override
+                public int getAnalyzedPlaylistsCount() {
+                    return 0;
+                }
+
+                @Override
+                public void incrementAnalyzedPlaylistsCount() {}
+            };
+
             AnalyzePlaylistInteractor interactor = new AnalyzePlaylistInteractor(
                     playlistFactory,
                     new SentimentResultFactory(),
                     mockSentimentDAO,
                     mockPresenter,
                     mockPlaylistDAO,
-                    null
+                    mockStatsDAO
             );
             interactor.execute(inputData);
             assertTrue(sentimentCalled[0]);

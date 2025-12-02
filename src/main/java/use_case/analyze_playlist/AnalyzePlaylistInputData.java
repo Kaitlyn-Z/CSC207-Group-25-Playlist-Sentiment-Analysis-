@@ -9,14 +9,14 @@ import com.google.gson.JsonArray;
  */
 public class AnalyzePlaylistInputData {
     private String playlistId;
-    private JsonArray songs;
     private String playlistName;
+    private JsonArray songs;
 
     // derive songs from playlist.songs
     public AnalyzePlaylistInputData(String playlistId, String playlistName, JsonArray songs) {
         this.playlistId = playlistId;
-        this.songs = songs;
         this.playlistName = playlistName;
+        this.songs = songs;
     }
 
     String getPlaylistId() {

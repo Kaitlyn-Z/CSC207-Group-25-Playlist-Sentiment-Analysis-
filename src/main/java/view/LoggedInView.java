@@ -120,9 +120,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     
         private void addSamplePlaylist() {
             JsonArray songs = new JsonArray();
-            songs.add(createSong("Become the Warm Jets", "Green Day (Mock)"));
-            songs.add(createSong("Sunshine", "Artist X"));
-            songs.add(createSong("Midnight Rain", "Artist Y"));
+            songs.add(createSong("Riptide", "Vance Joy"));
+            songs.add(createSong("Let Her Go", "Passenger"));
+            songs.add(createSong("Hey There Delilah", "The Plain White T's"));
             this.samplePlaylist = new Playlist("sample-id", "Sample Playlist", songs);
     
             playlistListModel.addElement(new PlaylistItem(samplePlaylist.getPlaylistId(), samplePlaylist.getPlaylistName()));
@@ -173,46 +173,75 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     
             // Analyze selected playlist
             analyzeButton.addActionListener(e -> {
-                var state = loggedInViewModel.getState();
-                var playlist = state.selectedPlaylist;
-    
+                var loggedInState = loggedInViewModel.getState();
+                var playlist = loggedInState.selectedPlaylist;
+
                 if (playlist == null) {
                     JOptionPane.showMessageDialog(this, "Please select a playlist first.", "No Playlist Selected", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-    
-                // --- Trigger Analysis and Show Pop-up ---
-                
-                // 1. Create the pop-up view and dialog
+
+                // --- Part 1: Immediately update UI to "Loading" state and show the dialog ---
+
+                var analysisState = analysisViewModel.getState();
+                analysisState.setLoading(true);
+                analysisState.setPlaylistName(playlist.getPlaylistName());
+                // Pass the songs to the state so the view can display them immediately
+                analysisState.setSongs(playlist.getSongs());
+                analysisViewModel.firePropertyChanged();
+
                 AnalysisView analysisView = new AnalysisView(analysisViewModel);
                 JDialog analysisDialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Analysis Results");
                 analysisDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
                 analysisDialog.setContentPane(analysisView);
-                
-                // 2. Show the dialog
+
                 analysisDialog.pack();
-                analysisDialog.setLocationRelativeTo(this); // Center relative to the main window
+                analysisDialog.setLocationRelativeTo(this);
                 analysisDialog.setVisible(true);
-    
-                // 3. Execute the analysis (which will update the visible pop-up via the view model)
-                if (samplePlaylist != null && playlist.getPlaylistId().equals(samplePlaylist.getPlaylistId())) {
-                    JsonArray songsWithLyrics = new JsonArray();
-                    songsWithLyrics.add(createSong("Become the Warm Jets", "Green Day (Mock)", "I walk the lonely road, the only one that I have ever known."));
-                    songsWithLyrics.add(createSong("Sunshine", "Artist X", "The sun shines bright, making everything feel right. A smile on my face, winning the race."));
-                    songsWithLyrics.add(createSong("Midnight Rain", "Artist Y", "Silent streets, a hidden tear. Waiting for the light to appear. Every night, the same old fear."));
-    
-                    analysisController.execute(
-                        playlist.getPlaylistId(),
-                        playlist.getPlaylistName(),
-                        songsWithLyrics
-                    );
-                } else {
-                    analysisController.execute(
-                        playlist.getPlaylistId(),
-                        playlist.getPlaylistName(),
-                        playlist.getSongs()
-                    );
-                }
+
+                // --- Part 2: Run the actual analysis in a background thread ---
+
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        if (samplePlaylist != null && playlist.getPlaylistId().equals(samplePlaylist.getPlaylistId())) {
+                            JsonArray songsWithLyrics = new JsonArray();
+                            songsWithLyrics.add(createSong("Riptide", "Vance Joy", "I was scared of dentists and the dark I was scared of girls and starting conversations Oh, all my friends are turning green You're the magician's assistant in their dream Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh And they come unstuck Lady, running down to the riptide Taken away to the dark side I wanna be your left hand man I love you when you're singing that song and I got a lump in my throat 'Cause you're gonna sing the words wrong Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh I just wanna, I just wanna know If you're gonna stay, I gotta know I can't have it, I can't have it any other way I swear she's destined for the screen Closest thing to a G-d that I have ever seen Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh Lady, running down to the riptide Taken away to the dark side I wanna be your left hand man I love you when you're singing that song and I got a lump in my throat 'Cause you're gonna sing the words wrong Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh I just wanna, I just wanna know If you're gonna stay, I gotta know I can't have it, I can't have it any other way So, become my left hand man We'll become one with the Riptide Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh (Oh, lady, running down to the riptide, taken away to the dark side) Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh (I wanna be your left hand man) Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh (I love you when you're singing that song and I got a lump in my throat) Ah, ooh, ooh, ooh Ah, ooh, ooh, ooh ('Cause you're gonna sing the words wrong) Lady, running down to the riptide Taken away to the dark side I wanna be your left hand man I love you when you're singing that song and I got a lump in my throat 'Cause you're gonna sing the words wrong I just wanna, I just wanna know If you're gonna stay, I gotta know, I can't have it, I can't have it any other way"));
+                            songsWithLyrics.add(createSong("Let Her Go", "Passenger", "Well, you only need the light when it's burning low Only miss the sun when it starts to snow Only know you love her when you let her go Only know you've been high when you're feeling low Only hate the road when you're missing home Only know you love her when you let her go And you let her go Staring at the bottom of your glass Hoping one day you'll make a dream last But dreams come slow and they go so fast You see her when you close your eyes Maybe one day you'll understand why Everything you touch, oh, it dies 'Cause you only need the light whenit's burning low Only miss the sun when it starts to snow Only know you love her when you let her go Only know you've been high when you're feeling low Only hate the road when you're missing home Only know you love her when you let her go Staring at the ceiling in the dark Same old empty feeling in your heart 'Cause love comes slow and it goes so fast Well, you see her when you fall asleep But never get to keep all the promises you make Pffft, and you'll lie 'Cause you only need the light when it's burning low Only miss the sun when it starts to snow Only know you love her when you let her go Only know you've been high when you're feeling low Only hate the road when you're missing home Only know you love her when you let her go And you let her go Woah-oh-oh Woah-oh-oh Woah-oh-oh Woah-oh-oh Woah-oh-oh Woah-oh-oh Woah-oh-oh 'Cause you only need the light when it's burning low Only miss the sun when it starts to snow Only know you love her when you let her go Only know you've been high when you're feeling low Only hate the road when you're missing home Only know you love her when you let her go 'Cause you only need the light when it's burning low Only miss the sun when it starts to snow Only know you love her when you let her go Only know you've been high when you're feeling low Only hate the road when you're missing home Only know you love her when you let her go Let her go"));
+                            songsWithLyrics.add(createSong("Hey There Delilah", "Plain White T's", "Hey there Delilah What's it like in New York City? I'm a thousand miles away But girl, tonight you look so pretty Yes, you do Time's Square can't shine as bright as your divine I swear it's true Hey there Delilah Don't you worry about the distance I'm right there if you get lonely Give this song another listen Close your eyes Listen to my voice, it's my disguise I'm by your side Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me What you do Hey there Delilah I know times are getting hard But just believe me, girl, someday I'll pay the bills with this guitar We'll have it all We'll have what we deserve Delilah's theme song starts with a D and ends with a love Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me Ten years ago, I never thought I'd be talking to you right here right now But I just got so much to say, man, I'm trying to play it cool Hey there Delilah I've got so much left to say If every simple song I wrote to you Would take your breath away I'd write it all Even more in love with me you'd fall We'd have it all Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me Oh, it's what you do to me What you do Hey there Delilah What's it like in New York City? I'm a thousand miles away But girl, tonight you look so pretty Yes, you do Time's Square can't shine as bright as your divine I swear it's true"));
+
+                            analysisController.execute(
+                                playlist.getPlaylistId(),
+                                playlist.getPlaylistName(),
+                                songsWithLyrics
+                            );
+                        } else {
+                            analysisController.execute(
+                                playlist.getPlaylistId(),
+                                playlist.getPlaylistName(),
+                                playlist.getSongs()
+                            );
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        // The presenter will update the view model when the analysis is complete.
+                        // We could add error handling here if the worker throws an exception.
+                        try {
+                            get(); // Call get() to retrieve the result and propagate exceptions
+                        } catch (Exception ex) {
+                            // The presenter should have already handled this, but as a fallback:
+                            var currentState = analysisViewModel.getState();
+                            currentState.setLoading(false);
+                            currentState.setErrorMessage("An unexpected error occurred during analysis: " + ex.getMessage());
+                            analysisViewModel.firePropertyChanged();
+                        }
+                    }
+                };
+
+                worker.execute();
             });
 
             // Show stats button

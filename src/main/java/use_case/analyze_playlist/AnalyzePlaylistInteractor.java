@@ -20,7 +20,6 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
     private final SentimentResultFactory sentimentResultFactory;
     private final SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject;
     private final AnalysisStatsDataAccessInterface analysisStatsDataAccessObject;
-    // New field
 
     /**
      * Constructs the interactor with its dependencies.
@@ -38,7 +37,6 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
                                      AnalyzePlaylistOutputBoundary analyzePlaylistPresenter,
                                      SpotifyPlaylistDataAccessInterface spotifyPlaylistDataAccessObject,
                                      AnalysisStatsDataAccessInterface analysisStatsDataAccessObject) {
-        // Modified constructor
 
         this.sentimentDataAccessObject = sentimentDataAccessObject;
         this.analyzePlaylistPresenter = analyzePlaylistPresenter;
@@ -46,7 +44,6 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
         this.sentimentResultFactory = sentimentResultFactory;
         this.spotifyPlaylistDataAccessObject = spotifyPlaylistDataAccessObject;
         this.analysisStatsDataAccessObject = analysisStatsDataAccessObject;
-        // Initialize new field
     }
 
     @Override
@@ -58,23 +55,20 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
 
         if (playlist.getSongs().size() == 0) {
             analyzePlaylistPresenter.prepareFailView("Selected playlist is empty");
-
-        }
-        else {
-
-            final JsonArray songsInfo =
-                    spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
-
-            if (songsInfo.size() == 0) {
-                analyzePlaylistPresenter.prepareFailView("No lyrics found");
-
+        } else {
+            JsonArray songInfo;
+            if (playlist.getSongs().size() > 0 && playlist.getSongs().get(0).getAsJsonObject().has("lyrics")) {
+                songInfo = playlist.getSongs();
+            } else {
+                songInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
             }
-            else {
-                // Section2: do analysis here
-                analysisStatsDataAccessObject.incrementAnalyzedPlaylistsCount();
-                // Increment count every time execute is called
 
-                final String lyrics = spotifyPlaylistDataAccessObject.getStringLyrics(songsInfo);
+            if (songInfo.size() == 0) {
+                analyzePlaylistPresenter.prepareFailView("No lyrics found");
+            } else {    // analyze lyrics
+                analysisStatsDataAccessObject.incrementAnalyzedPlaylistsCount();
+
+                final String lyrics = spotifyPlaylistDataAccessObject.getStringLyrics(songInfo);
 
                 try {
                     final SentimentResult result = sentimentDataAccessObject.analyzeSentiment(lyrics);

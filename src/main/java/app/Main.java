@@ -13,7 +13,6 @@ public class Main {
                 .addLoginView()
                 .addLoggedInView()
                 .addAnalysisView()
-                .addSelectPlaylistUseCase()
                 .addLoginUseCase()
                 .addAnalysisUseCase()
                 .addLogoutUseCase()

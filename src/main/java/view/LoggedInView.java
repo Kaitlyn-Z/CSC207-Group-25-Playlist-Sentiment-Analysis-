@@ -1,10 +1,6 @@
 package view;
 
-import interface_adapter.analysis.AnalysisController;
 import interface_adapter.logged_in.LoggedInViewModel;
-import interface_adapter.logged_in.PlaylistItem;
-import interface_adapter.logged_in.SelectPlaylistController;
-import interface_adapter.logged_in.SelectPlaylistPresenter;
 import interface_adapter.logout.LogoutController;
 
 import javax.swing.*;
@@ -24,12 +20,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private final LoggedInViewModel loggedInViewModel;
     private LogoutController logoutController;
-    private SelectPlaylistController selectPlaylistController;
-    private AnalysisController analysisController;
 
     // --- Main UI components ---
-    private final DefaultListModel<PlaylistItem> playlistListModel = new DefaultListModel<>();
-    private final JList<PlaylistItem> playlistList = new JList<>(playlistListModel);
+    private final DefaultListModel<String> playlistListModel = new DefaultListModel<>();
+    private final JList<String> playlistList = new JList<>(playlistListModel);
 
     private final JButton refreshButton = new JButton("Refresh Playlists");
     private final JButton analyzeButton = new JButton("Analyze Selected");
@@ -112,25 +106,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     }
 
     /** TODO: remove this once playlists come from your ViewModel / Spotify use case */
-    /* private void addDummyPlaylistsForNow() {
-        playlistListModel.addElement("🎵 Chill Vibes");// it won't work now cuz I changed the model from string to playlistitem
+    private void addDummyPlaylistsForNow() {
+        playlistListModel.addElement("🎵 Chill Vibes");
         playlistListModel.addElement("🔥 Workout Mix");
         playlistListModel.addElement("🎧 Study Lo-fi");
-    }*/
+    }
 
     // ---------- Button behaviour ----------
 
     private void wireButtonActions() {
-        // Update status label, call controller to prepare selected playlist's info
-        playlistList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting() && selectPlaylistController != null) {
-                PlaylistItem selected = playlistList.getSelectedValue();
-                if (selected != null) {
-                    selectPlaylistController.execute(selected.getId(), selected.getName());
-                }
-            }
-        });
-
         // Refresh playlists (placeholder behavior)
         refreshButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(
@@ -144,9 +128,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         // Analyze selected playlist (placeholder)
         analyzeButton.addActionListener(e -> {
-            var state = loggedInViewModel.getState();
-
-            if (state.selectedPlaylist == null) {
+            String selected = playlistList.getSelectedValue();
+            if (selected == null) {
                 JOptionPane.showMessageDialog(
                         this,
                         "Please select a playlist first.",
@@ -156,15 +139,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                 return;
             }
 
-            var playlist = state.selectedPlaylist;
-
-            analysisController.execute(
-                    playlist.getPlaylistId(),
-                    playlist.getPlaylistName(),
-                    playlist.getSongs()
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Analyze Selected clicked for playlist:\n" + selected +
+                            "\n\nTODO: Connect this to your Analysis Use Case.",
+                    "Analyze",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         });
-
 
         // Log out (fully wired)
         logoutButton.addActionListener(e -> {
@@ -203,16 +185,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return VIEW_NAME;
     }
 
-    public void setSelectPlaylistController(SelectPlaylistController controller) {
-        this.selectPlaylistController = controller;
-    }
-
     // ---------- Reacting to ViewModel changes ----------
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        var state = loggedInViewModel.getState();
-        statusLabel.setText(state.statusMessage);
         // Later, when LoggedInViewModel has playlist data or displayName,
         // you can update statusLabel and playlistListModel here.
 

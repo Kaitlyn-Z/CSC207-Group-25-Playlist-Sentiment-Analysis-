@@ -2,6 +2,7 @@ package view;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import data_access.AnalysisStatsDataAccessObject;
 import entity.Playlist;
 import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisViewModel;
@@ -37,6 +38,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     
         private final JButton refreshButton = new JButton("Refresh Playlists");
         private final JButton analyzeButton = new JButton("Analyze Selected");
+        private final JButton showStatsButton = new JButton("Show Stats");
         private final JButton logoutButton = new JButton("Log Out");
     
         private final JLabel statusLabel = new JLabel("No playlist selected.");
@@ -106,6 +108,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.add(refreshButton);
             buttonPanel.add(analyzeButton);
+            buttonPanel.add(showStatsButton);
             buttonPanel.add(logoutButton);
     
             bottomBar.add(buttonPanel, BorderLayout.EAST);
@@ -210,6 +213,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
                         playlist.getSongs()
                     );
                 }
+            });
+
+            // Show stats button
+            showStatsButton.addActionListener(e -> {
+                AnalysisStatsDataAccessObject statsDAO = new AnalysisStatsDataAccessObject("analysis_stats.json");
+                int count = statsDAO.getAnalyzedPlaylistsCount();
+                JOptionPane.showMessageDialog(this, "Number of playlists analyzed: " + count, "Analysis Statistics", JOptionPane.INFORMATION_MESSAGE);
             });
     
             // Log out (fully wired)

@@ -1,0 +1,27 @@
+I have created a new test file: `src/test/java/data_access/DBSentimentResultDataAccessObjectTest.java`
+
+To run these tests and verify the Gemini API integration, you need to:
+
+1.  **Obtain a `GEMINI_API_KEY`**:
+    *   Go to the [Google AI Studio](https://aistudio.google.com/) or Google Cloud Console.
+    *   Create a new project or select an existing one.
+    *   Generate an API key for the Gemini API.
+
+2.  **Set the `GEMINI_API_KEY` environment variable**:
+    *   Similar to how you set the Spotify Client ID/Secret, you need to set an environment variable named `GEMINI_API_KEY` with the key you just generated.
+    *   **For IntelliJ IDEA (recommended for development):**
+        1.  Go to `Run` -> `Edit Configurations...`
+        2.  Select your application's Run/Debug configuration (e.g., "Main") or create a new JUnit configuration for the test class.
+        3.  In the "Environment variables" field, click the "..." button.
+        4.  Click the "+" button to add a new variable: `Name: GEMINI_API_KEY`, `Value: your_gemini_api_key_here`.
+        5.  Click `OK` on all dialogs.
+    *   **For Windows Command Prompt/PowerShell (temporary, for current session):**
+        *   **Command Prompt:** `set GEMINI_API_KEY=your_gemini_api_key_here`
+        *   **PowerShell:** `$env:GEMINI_API_KEY="your_gemini_api_key_here"`
+        Run your tests from this same terminal window.
+
+3.  **Run the tests**:
+    *   **If using IntelliJ IDEA**: Right-click on the `DBSentimentResultDataAccessObjectTest.java` file in the project explorer and select "Run 'DBSentimentResultData...'" or open the file and click the green play icon next to the test class/methods.
+    *   **If using Maven from the command line**: Navigate to your project's root directory in a terminal and run: `mvn test` (this will run all tests) or `mvn -Dtest=DBSentimentResultDataAccessObjectTest test` (to run only this specific test class).
+
+The tests will provide feedback on whether the Gemini API is reachable and responding as expected. If the `GEMINI_API_KEY` is not set, the tests will be skipped.

@@ -150,4 +150,8 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
             return this;
         }
     }
+
+    public static String getViewName() {
+        return VIEW_NAME;
+    }
 }

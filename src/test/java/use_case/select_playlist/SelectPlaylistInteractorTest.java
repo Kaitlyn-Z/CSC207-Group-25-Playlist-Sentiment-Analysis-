@@ -44,8 +44,9 @@ class SelectPlaylistInteractorTest {
     void playlistNotFoundFailureTest() {
 
         LoggedInViewModel viewModel = new LoggedInViewModel();
-        viewModel.setPlaylists(java.util.List.of());
+        viewModel.setPlaylists(java.util.List.of()); // 空
 
+        // 2. presenter 用来测试 fail 分支
         SelectPlaylistOutputBoundary failurePresenter = new SelectPlaylistOutputBoundary() {
             @Override
             public void prepareSuccessView(SelectPlaylistOutputData outputData) {
@@ -58,12 +59,15 @@ class SelectPlaylistInteractorTest {
             }
         };
 
+        // 3. Interactor
         SelectPlaylistInputBoundary interactor =
                 new SelectPlaylistInteractor(viewModel, failurePresenter);
 
+        // 4. 输入不存在 playlist 的 id
         SelectPlaylistInputData inputData =
                 new SelectPlaylistInputData("9999", "Unknown");
 
+        // 5. 执行 use case
         interactor.execute(inputData);
     }
 }

@@ -11,6 +11,10 @@ public class SelectPlaylistOutputData {
         this.statusMessage = statusMessage;
     }
 
-    public Playlist getSelectedPlaylist() { return selectedPlaylist; }
-    public String getStatusMessage() { return statusMessage; }
+    public Playlist getSelectedPlaylist() {
+        return selectedPlaylist;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage; }
 }

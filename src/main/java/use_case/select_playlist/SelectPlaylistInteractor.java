@@ -16,7 +16,7 @@ public class SelectPlaylistInteractor implements SelectPlaylistInputBoundary {
 
     @Override
     public void execute(SelectPlaylistInputData inputData) {
-        final var playlists = loggedInViewModel.getPlaylists();
+        var playlists = loggedInViewModel.getPlaylists();
 
         Playlist selected = null;
         for (Playlist p : playlists) {
@@ -31,7 +31,7 @@ public class SelectPlaylistInteractor implements SelectPlaylistInputBoundary {
             return;
         }
 
-        final SelectPlaylistOutputData outputData = new SelectPlaylistOutputData(selected, "Selected playlist: "
+        SelectPlaylistOutputData outputData = new SelectPlaylistOutputData(selected, "Selected playlist: "
                 + selected.getPlaylistName());
 
         presenter.prepareSuccessView(outputData);

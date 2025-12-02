@@ -68,18 +68,14 @@ public class LoggedInViewModel {
 
         if (playlist != null) {
             state.statusMessage = "Selected playlist: " + playlist.getPlaylistName();
-        }
-        else {
+        } else {
             state.statusMessage = "No playlist selected.";
         }
 
         support.firePropertyChange("state", null, state);
     }
 
-    /**
-     * Set Status Message.
-     * @param message message
-     */
+
     public void setStatusMessage(String message) {
         state.statusMessage = message;
         support.firePropertyChange("state", null, state);

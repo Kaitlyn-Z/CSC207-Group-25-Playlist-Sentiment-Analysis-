@@ -11,11 +11,6 @@ public class SelectPlaylistController {
         this.interactor = interactor;
     }
 
-    /**
-     * Execute method.
-     * @param playlistId id
-     * @param playlistName name
-     */
     public void execute(String playlistId, String playlistName) {
         interactor.execute(new SelectPlaylistInputData(playlistId, playlistName));
     }

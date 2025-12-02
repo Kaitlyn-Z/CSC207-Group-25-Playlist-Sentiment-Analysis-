@@ -12,13 +12,12 @@ public class Main {
         final JFrame application = appBuilder
                 .addLoginView()
                 .addLoggedInView()
-                .addAnalysisView()
                 .addSelectPlaylistUseCase()
                 .addLoginUseCase()
                 .addAnalysisUseCase()
                 .addLogoutUseCase()
                 .build();
-
+                
         application.pack();
         application.setLocationRelativeTo(null);
         application.setVisible(true);

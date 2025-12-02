@@ -65,10 +65,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         JTextArea infoArea = new JTextArea(
                 "How to use:\n\n" +
                         "1. Select one of your playlists from the list.\n" +
-                        "2. Click \"Analyze Selected\" to run lyric sentiment analysis.\n\n" +
-                        "Notes:\n" +
-                        "- \"Refresh Playlists\" will later be connected to Spotify.\n" +
-                        "- \"Analyze Selected\" will later call the Analysis Use Case."
+                        "2. Click \"Analyze Selected\" to run lyric sentiment analysis.\n\n"
         );
         infoArea.setEditable(false);
         infoArea.setLineWrap(true);

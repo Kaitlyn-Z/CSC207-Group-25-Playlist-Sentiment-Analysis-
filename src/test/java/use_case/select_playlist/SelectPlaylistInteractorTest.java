@@ -66,5 +66,35 @@ class SelectPlaylistInteractorTest {
 
         interactor.execute(inputData);
     }
+
+    @Test
+    void playlistExistsButIdDoesNotMatchTest() {
+
+        LoggedInViewModel viewModel = new LoggedInViewModel();
+
+        JsonArray songs = new JsonArray();
+        Playlist playlist = new Playlist("123", "MyPlaylist", songs);
+        viewModel.setPlaylists(java.util.List.of(playlist)); // 列表非空，但不匹配
+
+        SelectPlaylistOutputBoundary failurePresenter = new SelectPlaylistOutputBoundary() {
+            @Override
+            public void prepareSuccessView(SelectPlaylistOutputData outputData) {
+                fail("Should not succeed.");
+            }
+
+            @Override
+            public void prepareFailView(String error) {
+                assertEquals("Playlist not found.", error);
+            }
+        };
+
+        SelectPlaylistInputBoundary interactor =
+                new SelectPlaylistInteractor(viewModel, failurePresenter);
+
+        SelectPlaylistInputData inputData =
+                new SelectPlaylistInputData("999", "WrongName"); // 不匹配
+
+        interactor.execute(inputData);
+    }
 }
 

@@ -56,12 +56,7 @@ public class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
         if (playlist.getSongs().size() == 0) {
             analyzePlaylistPresenter.prepareFailView("Selected playlist is empty");
         } else {
-            JsonArray songInfo;
-            if (playlist.getSongs().size() > 0 && playlist.getSongs().get(0).getAsJsonObject().has("lyrics")) {
-                songInfo = playlist.getSongs();
-            } else {
-                songInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
-            }
+            JsonArray songInfo = spotifyPlaylistDataAccessObject.getLyrics(playlist.getSongs());
 
             if (songInfo.size() == 0) {
                 analyzePlaylistPresenter.prepareFailView("No lyrics found");

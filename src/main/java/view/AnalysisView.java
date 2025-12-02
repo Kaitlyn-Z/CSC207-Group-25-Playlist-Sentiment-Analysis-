@@ -33,15 +33,15 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
     }
 
     private void buildUI() {
-        // --- Top Header Panel (Playlist Name and Close Button) ---
-        JPanel topHeaderPanel = new JPanel(new BorderLayout());
+        // --- Top Header Content Panel (Playlist Name and Close Button) ---
+        JPanel topHeaderContentPanel = new JPanel(new BorderLayout());
         playlistNameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         playlistNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        topHeaderPanel.add(playlistNameLabel, BorderLayout.CENTER);
+        topHeaderContentPanel.add(playlistNameLabel, BorderLayout.CENTER);
 
         JPanel closeButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         closeButtonPanel.add(closeButton);
-        topHeaderPanel.add(closeButtonPanel, BorderLayout.EAST);
+        topHeaderContentPanel.add(closeButtonPanel, BorderLayout.EAST);
 
         closeButton.addActionListener(e -> {
             Window window = SwingUtilities.getWindowAncestor(this);
@@ -50,9 +50,9 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // --- Center Panel for Song List ---
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // --- Song List Panel (now at the top) ---
+        JPanel songListPanel = new JPanel(new BorderLayout(5, 5));
+        songListPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel listContainer = new JPanel();
         listContainer.setLayout(new BoxLayout(listContainer, BoxLayout.Y_AXIS));
         listContainer.add(new JLabel("Songs in Playlist:"));
@@ -71,12 +71,18 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
         songList.setCellRenderer(new SongListCellRenderer());
         JScrollPane scrollPane = new JScrollPane(songList);
         listContainer.add(scrollPane);
-        centerPanel.add(listContainer, BorderLayout.CENTER);
+        songListPanel.add(listContainer, BorderLayout.CENTER);
+
+
+        // --- Combine Top Header and Song List into a single NORTH panel ---
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
+        northPanel.add(topHeaderContentPanel);
+        northPanel.add(songListPanel);
 
         // --- Assemble View ---
-        this.add(topHeaderPanel, BorderLayout.NORTH);
-        this.add(centerPanel, BorderLayout.CENTER);
-        this.add(sentimentPanel, BorderLayout.SOUTH);
+        this.add(northPanel, BorderLayout.NORTH);
+        this.add(sentimentPanel, BorderLayout.CENTER);
 
         // Set initial state
         updateViewFromState(this.analysisViewModel.getState());
@@ -92,23 +98,22 @@ public class AnalysisView extends JPanel implements PropertyChangeListener {
 
     private void updateViewFromState(AnalysisState state) {
         sentimentPanel.setLoading(state.isLoading());
+        playlistNameLabel.setText(state.getPlaylistName()); // Set name regardless of loading
+
+        // Populate song list regardless of loading state
+        DefaultListModel<JsonObject> model = (DefaultListModel<JsonObject>) songList.getModel();
+        model.clear();
+        if (state.getSongs() != null) {
+            for (int i = 0; i < state.getSongs().size(); i++) {
+                model.addElement(state.getSongs().get(i).getAsJsonObject());
+            }
+        }
 
         if (state.isLoading()) {
-            playlistNameLabel.setText("Analyzing...");
-            DefaultListModel<JsonObject> model = (DefaultListModel<JsonObject>) songList.getModel();
-            model.clear();
+            playlistNameLabel.setText("Analyzing..."); // Override name if loading
             sentimentPanel.setResult(null); // Clear previous results
         } else {
-            playlistNameLabel.setText(state.getPlaylistName());
-
-            DefaultListModel<JsonObject> model = (DefaultListModel<JsonObject>) songList.getModel();
-            model.clear();
-            if (state.getSongs() != null) {
-                for (int i = 0; i < state.getSongs().size(); i++) {
-                    model.addElement(state.getSongs().get(i).getAsJsonObject());
-                }
-            }
-
+            // Not loading: update results and handle errors
             if (state.getResult() != null) {
                 sentimentPanel.setResult(state.getResult());
             }

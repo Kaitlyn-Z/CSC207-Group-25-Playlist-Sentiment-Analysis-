@@ -10,9 +10,9 @@ import java.beans.PropertyChangeListener;
 
 /**
  * Main page shown after user logs in.
- * - Shows a list of playlists (UI only for now)
- * - Buttons to refresh & analyze (placeholder behaviour)
- * - Fully working Log Out button
+ * - Shows a list of playlists
+ * - Instruction text on the right
+ * - Buttons to refresh, analyze, and log out
  */
 public class LoggedInView extends JPanel implements PropertyChangeListener {
 
@@ -50,15 +50,36 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         title.setFont(title.getFont().deriveFont(Font.BOLD, 18f));
         add(title, BorderLayout.NORTH);
 
-        // ===== CENTER: Playlists list ONLY =====
+        // ===== CENTER: Playlists area (left) + Instructions (right) =====
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Left side: playlist list inside scroll pane
         playlistList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane playlistScroll = new JScrollPane(playlistList);
         playlistScroll.setBorder(BorderFactory.createTitledBorder("Your Playlists"));
 
         centerPanel.add(playlistScroll, BorderLayout.CENTER);
+
+        // Right side: instructions
+        JTextArea infoArea = new JTextArea(
+                "How to use:\n\n" +
+                        "1. Select one of your playlists from the list.\n" +
+                        "2. Click \"Analyze Selected\" to run lyric sentiment analysis.\n\n" +
+                        "Notes:\n" +
+                        "- \"Refresh Playlists\" will later be connected to Spotify.\n" +
+                        "- \"Analyze Selected\" will later call the Analysis Use Case."
+        );
+        infoArea.setEditable(false);
+        infoArea.setLineWrap(true);
+        infoArea.setWrapStyleWord(true);
+        infoArea.setOpaque(false);
+
+        JPanel infoPanel = new JPanel(new BorderLayout());
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        infoPanel.add(infoArea, BorderLayout.NORTH);
+
+        centerPanel.add(infoPanel, BorderLayout.EAST);
 
         add(centerPanel, BorderLayout.CENTER);
 
@@ -80,10 +101,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         add(bottomBar, BorderLayout.SOUTH);
 
-        // (Optional) some dummy data so UI doesn’t look empty
+        // Dummy playlists for now (remove when you hook real data)
         addDummyPlaylistsForNow();
     }
 
+    /** TODO: remove this once playlists come from your ViewModel / Spotify use case */
     private void addDummyPlaylistsForNow() {
         playlistListModel.addElement("🎵 Chill Vibes");
         playlistListModel.addElement("🔥 Workout Mix");
@@ -97,7 +119,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         refreshButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(
                     this,
-                    "Refresh Playlists clicked.\n(This will be connected to Spotify later.)",
+                    "Refresh Playlists clicked.\n" +
+                            "Later this will call a use case to fetch playlists from Spotify.",
                     "Refresh",
                     JOptionPane.INFORMATION_MESSAGE
             );
@@ -119,7 +142,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             JOptionPane.showMessageDialog(
                     this,
                     "Analyze Selected clicked for playlist:\n" + selected +
-                            "\n\nTODO: Connect to Analysis Use Case.",
+                            "\n\nTODO: Connect this to your Analysis Use Case.",
                     "Analyze",
                     JOptionPane.INFORMATION_MESSAGE
             );
@@ -157,15 +180,25 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return VIEW_NAME;
     }
 
+    // Alias for your existing LoginPresenter code
     public static String getViewNameStatic() {
         return VIEW_NAME;
     }
-
 
     // ---------- Reacting to ViewModel changes ----------
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Future work: update playlists or user name from ViewModel
+        // Later, when LoggedInViewModel has playlist data or displayName,
+        // you can update statusLabel and playlistListModel here.
+
+        // Example (pseudo-code, only if your State has these fields):
+        //
+        // var state = loggedInViewModel.getState();
+        // statusLabel.setText("Welcome, " + state.displayName + "!");
+        // playlistListModel.clear();
+        // for (String name : state.playlistNames) {
+        //     playlistListModel.addElement(name);
+        // }
     }
 }

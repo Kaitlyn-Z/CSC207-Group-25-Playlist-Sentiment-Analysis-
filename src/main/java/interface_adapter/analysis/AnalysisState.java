@@ -1,20 +1,22 @@
 package interface_adapter.analysis;
 
+import com.google.gson.JsonArray;
 import entity.SentimentResult;
 
-//TODO: Since you don't need to input lyrics from outside, these codes may need to be modified.
 /**
  * The mutable state data structure for the Analysis View.
  */
 public class AnalysisState {
-    private String lyrics = "";
+    private String playlistName = "";
+    private JsonArray songs = null;
     private boolean isLoading = false;
     private SentimentResult result = null;
     private String errorMessage = null;
 
     // Constructor (Copy constructor for thread-safe state management)
     public AnalysisState(AnalysisState copy) {
-        lyrics = copy.lyrics;
+        playlistName = copy.playlistName;
+        songs = copy.songs;
         isLoading = copy.isLoading;
         result = copy.result;
         errorMessage = copy.errorMessage;
@@ -24,8 +26,12 @@ public class AnalysisState {
     public AnalysisState() {}
 
     // Getters
-    public String getLyrics() {
-        return lyrics;
+    public String getPlaylistName() {
+        return playlistName;
+    }
+
+    public JsonArray getSongs() {
+        return songs;
     }
 
     public boolean isLoading() {
@@ -41,8 +47,12 @@ public class AnalysisState {
     }
 
     // Setters
-    public void setLyrics(String lyrics) {
-        this.lyrics = lyrics;
+    public void setPlaylistName(String playlistName) {
+        this.playlistName = playlistName;
+    }
+
+    public void setSongs(JsonArray songs) {
+        this.songs = songs;
     }
 
     public void setLoading(boolean loading) {

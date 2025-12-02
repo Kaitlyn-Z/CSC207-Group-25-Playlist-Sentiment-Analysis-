@@ -62,10 +62,14 @@ public class AppBuilder {
     private AnalysisViewModel analysisViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
-    private AnalysisView analysisView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        // ViewModels are created upfront
+        loginViewModel = new LoginViewModel();
+        loggedInViewModel = new LoggedInViewModel();
+        analysisViewModel = new AnalysisViewModel();
     }
 
     /**
@@ -73,7 +77,6 @@ public class AppBuilder {
      * @return this
      */
     public AppBuilder addLoginView() {
-        loginViewModel = new LoginViewModel();
         loginView = new LoginView(loginViewModel);
         cardPanel.add(loginView, loginView.getViewName());
         return this;
@@ -84,21 +87,8 @@ public class AppBuilder {
      * @return this
      */
     public AppBuilder addLoggedInView() {
-        loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel, analysisViewModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
-        return this;
-    }
-
-    /**
-     * Add analysis view to panel.
-     * @return this
-     */
-    public AppBuilder addAnalysisView() {
-        analysisViewModel = new AnalysisViewModel();
-        analysisView = new AnalysisView(analysisViewModel, viewManagerModel, loggedInViewModel);
-        // Modified
-        cardPanel.add(analysisView, analysisView.getViewName());
         return this;
     }
 
@@ -107,16 +97,17 @@ public class AppBuilder {
      * @return this
      */
     public AppBuilder addAnalysisUseCase() {
+        // The presenter no longer needs the ViewManagerModel because it doesn't switch
+        // the main view. It just updates the AnalysisViewModel, which the pop-up listens to.
         final AnalyzePlaylistOutputBoundary analyzePlaylistOutputBoundary = new AnalysisPresenter(analysisViewModel);
 
         final AnalyzePlaylistInputBoundary analyzePlaylistInteractor = new AnalyzePlaylistInteractor(playlistFactory,
                 sentimentResultFactory, sentimentDataAccessObject,
                 analyzePlaylistOutputBoundary, spotifyPlaylistDataAccessObject,
                 analysisStatsDataAccessObject);
-        // New parameter
 
         final AnalysisController analysisController = new AnalysisController(analyzePlaylistInteractor);
-        analysisView.setAnalysisController(analysisController);
+        loggedInView.setAnalysisController(analysisController);
         return this;
     }
 
@@ -145,7 +136,6 @@ public class AppBuilder {
 
         final LogoutInputBoundary logoutInteractor =
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
-        //  ^ userDataAccessObject now implements LogoutUserDataAccessInterface
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);

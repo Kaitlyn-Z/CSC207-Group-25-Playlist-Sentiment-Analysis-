@@ -21,7 +21,8 @@ public class AnalysisController {
      * @param songs the list of songs contained in the playlist
      */
     public void execute(String playlistId, String playlistName, JsonArray songs) {
-        final AnalyzePlaylistInputData analyzePlaylistInputData = new AnalyzePlaylistInputData(playlistId, playlistName, songs);
+        final AnalyzePlaylistInputData analyzePlaylistInputData =
+                new AnalyzePlaylistInputData(playlistId, playlistName, songs);
 
         analyzePlaylistInteractor.execute(analyzePlaylistInputData);
     }

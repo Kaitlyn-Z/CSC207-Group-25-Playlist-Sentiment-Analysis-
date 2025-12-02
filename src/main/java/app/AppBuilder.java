@@ -17,6 +17,8 @@ import interface_adapter.analysis.AnalysisController;
 import interface_adapter.analysis.AnalysisPresenter;
 import interface_adapter.analysis.AnalysisViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.logged_in.SelectPlaylistController;
+import interface_adapter.logged_in.SelectPlaylistPresenter;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
@@ -31,6 +33,7 @@ import use_case.login.LoginOutputBoundary;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
+import use_case.select_playlist.SelectPlaylistInteractor;
 import view.AnalysisView;
 import view.LoggedInView;
 import view.LoginView;
@@ -148,6 +151,23 @@ public class AppBuilder {
         loggedInView.setLogoutController(logoutController);
         return this;
     }
+
+    public AppBuilder addSelectPlaylistUseCase() {
+
+        var presenter = new SelectPlaylistPresenter(loggedInViewModel);
+
+        var interactor = new SelectPlaylistInteractor(
+                loggedInViewModel,
+                presenter
+        );
+
+        var controller = new SelectPlaylistController(interactor);
+
+        loggedInView.setSelectPlaylistController(controller);
+
+        return this;
+    }
+
 
     /**
      * Build method.

@@ -13,6 +13,12 @@ public class LoggedInViewModel {
         public String displayName = "";
         public String spotifyId = "";
 
+        // new: selected playlist
+        public Playlist selectedPlaylist = null;
+
+        // new: bottom STATUS LABEL info
+        public String statusMessage = "No playlist selected.";
+
         // NEW: playlists fetched from Spotify for this user
         // These are entity.Playlist objects with id, name, and songs JsonArray.
         public List<Playlist> playlists = Collections.emptyList();
@@ -35,6 +41,7 @@ public class LoggedInViewModel {
         support.firePropertyChange("state", null, state);
     }
 
+
     /**
      * NEW: store the playlists for the currently logged-in user.
      * This is temporary (in-memory) state, not written to the DB.
@@ -54,4 +61,25 @@ public class LoggedInViewModel {
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
+
+    // new
+    public void setSelectedPlaylist(Playlist playlist) {
+        state.selectedPlaylist = playlist;
+
+        if (playlist != null) {
+            state.statusMessage = "Selected playlist: " + playlist.getPlaylistName();
+        } else {
+            state.statusMessage = "No playlist selected.";
+        }
+
+        support.firePropertyChange("state", null, state);
+    }
+
+
+    public void setStatusMessage(String message) {
+        state.statusMessage = message;
+        support.firePropertyChange("state", null, state);
+    }
+
+
 }

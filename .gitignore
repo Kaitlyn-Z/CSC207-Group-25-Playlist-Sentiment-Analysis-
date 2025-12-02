@@ -1,2 +1,20 @@
 # Ignore VS Code settings that might contain secrets
 .vscode/tasks.json
+
+# Maven
+target/
+
+# IntelliJ
+out/
+.idea/
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear

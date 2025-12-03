@@ -1,0 +1,160 @@
+@startuml
+!theme vibrant
+
+title Detailed UML for Analyze Playlist Use Case
+
+' Define packages for each layer
+package "View (UI Layer)" {
+    class LoggedInView {
+        - analysisController: AnalysisController
+        + setAnalysisController(controller: AnalysisController)
+        # wireButtonActions()
+    }
+    class AnalysisView {
+        - analysisViewModel: AnalysisViewModel
+        - songList: JList<JsonObject>
+        + propertyChange(evt: PropertyChangeEvent)
+        - buildUI()
+        - updateViewFromState(state: AnalysisState)
+    }
+}
+
+package "Interface Adapters (Controllers, Presenters, ViewModels)" {
+    class AnalysisController {
+        - analyzePlaylistInteractor: AnalyzePlaylistInputBoundary
+        + execute(playlistId: String, playlistName: String, songs: JsonArray)
+    }
+
+    class AnalysisPresenter implements AnalyzePlaylistOutputBoundary {
+        - analysisViewModel: AnalysisViewModel
+        + prepareSuccessView(outputData: AnalyzePlaylistOutputData)
+        + prepareFailView(error: String)
+    }
+
+    class AnalysisViewModel {
+        - state: AnalysisState
+        - support: PropertyChangeSupport
+        + getState(): AnalysisState
+        + setState(state: AnalysisState)
+        + firePropertyChanged()
+        + addPropertyChangeListener(listener: PropertyChangeListener)
+    }
+
+    class AnalysisState {
+        - playlistName: String
+        - songs: JsonArray
+        - isLoading: boolean
+        - result: SentimentResult
+        - errorMessage: String
+        + getPlaylistName(): String
+        + getSongs(): JsonArray
+        + isLoading(): boolean
+        + getResult(): SentimentResult
+        + getErrorMessage(): String
+        + setPlaylistName(name: String)
+        + setSongs(songs: JsonArray)
+        + setLoading(loading: boolean)
+        + setResult(result: SentimentResult)
+        + setErrorMessage(error: String)
+    }
+}
+
+package "Use Case (Application Business Rules)" {
+    interface AnalyzePlaylistInputBoundary {
+        + execute(inputData: AnalyzePlaylistInputData)
+    }
+    interface AnalyzePlaylistOutputBoundary {
+        + prepareSuccessView(outputData: AnalyzePlaylistOutputData)
+        + prepareFailView(error: String)
+    }
+    class AnalyzePlaylistInteractor implements AnalyzePlaylistInputBoundary {
+        - sentimentDataAccessObject: SentimentDataAccessInterface
+        - analyzePlaylistPresenter: AnalyzePlaylistOutputBoundary
+        - spotifyPlaylistDataAccessObject: SpotifyPlaylistDataAccessInterface
+        - analysisStatsDataAccessObject: AnalysisStatsDataAccessInterface
+        + execute(inputData: AnalyzePlaylistInputData)
+    }
+    class AnalyzePlaylistInputData {
+        - playlistId: String
+        - playlistName: String
+        - songs: JsonArray
+        + getPlaylistId(): String
+        + getPlaylistName(): String
+        + getSongs(): JsonArray
+    }
+    class AnalyzePlaylistOutputData {
+        - sentimentWord: String
+        - sentimentExplanation: String
+        + getSentimentWord(): String
+        + getSentimentExplanation(): String
+    }
+}
+
+package "Gateways (Frameworks & Drivers)" {
+    interface SpotifyPlaylistDataAccessInterface {
+        + getLyrics(songs: JsonArray): JsonArray
+        + getStringLyrics(songsInfo: JsonArray): String
+    }
+    interface SentimentDataAccessInterface {
+        + analyzeSentiment(combinedLyrics: String): SentimentResult
+    }
+    interface AnalysisStatsDataAccessInterface {
+        + incrementAnalyzedPlaylistsCount()
+        + getAnalyzedPlaylistsCount(): int
+    }
+
+    class DBPlaylistDataAccessObject implements SpotifyPlaylistDataAccessInterface {
+        - MAX_SONGS: int
+        + getLyrics(songs: JsonArray): JsonArray
+        + getStringLyrics(songsInfo: JsonArray): String
+    }
+    class DBSentimentResultDataAccessObject implements SentimentDataAccessInterface {
+        - API_URL: String
+        - apiKey: String
+        + analyzeSentiment(combinedLyrics: String): SentimentResult
+        - createSystemInstruction(): String
+        - parseGeminiResponse(jsonResponse: String): SentimentResult
+    }
+    class AnalysisStatsDataAccessObject implements AnalysisStatsDataAccessInterface {
+        - filePath: String
+        + incrementAnalyzedPlaylistsCount()
+        + getAnalyzedPlaylistsCount(): int
+    }
+}
+
+package "Entities (Enterprise Business Rules)" {
+    class Playlist {
+        - playlistId: String
+        - playlistName: String
+        - songs: JsonArray
+        + getPlaylistId(): String
+        + getPlaylistName(): String
+        + getSongs(): JsonArray
+    }
+    class SentimentResult {
+        - sentimentWord: String
+        - sentimentExplanation: String
+        + getSentimentWord(): String
+        + getSentimentExplanation(): String
+    }
+}
+
+' Relationships
+LoggedInView --> AnalysisController
+AnalysisController --> AnalyzePlaylistInputBoundary
+AnalysisPresenter --> AnalysisViewModel
+AnalysisView --> AnalysisViewModel
+AnalysisViewModel o-- AnalysisState
+
+AnalyzePlaylistInteractor --> AnalyzePlaylistOutputBoundary
+AnalyzePlaylistInteractor --> SpotifyPlaylistDataAccessInterface
+AnalyzePlaylistInteractor --> SentimentDataAccessInterface
+AnalyzePlaylistInteractor --> AnalysisStatsDataAccessInterface
+
+AnalysisController ..> AnalyzePlaylistInputData
+AnalyzePlaylistInteractor ..> AnalyzePlaylistOutputData
+
+AnalyzePlaylistInteractor ..> Playlist
+AnalyzePlaylistInteractor ..> SentimentResult
+
+@enduml

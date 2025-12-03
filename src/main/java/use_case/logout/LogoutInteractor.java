@@ -9,7 +9,7 @@ public class LogoutInteractor implements LogoutInputBoundary {
                             LogoutOutputBoundary presenter) {
         this.userDataAccess = userDataAccess;
         this.presenter = presenter;
-
+    }
 
     @Override
     public void execute() {

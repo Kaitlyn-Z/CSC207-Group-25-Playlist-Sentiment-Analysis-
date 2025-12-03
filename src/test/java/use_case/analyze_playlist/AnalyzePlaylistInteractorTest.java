@@ -1,13 +1,14 @@
 package use_case.analyze_playlist;
 
-import data_access.AnalysisStatsDataAccessObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import data_access.AnalysisStatsDataAccessObject;
 import entity.PlaylistFactory;
 import entity.SentimentResult;
 import entity.SentimentResultFactory;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,7 +100,6 @@ class AnalyzePlaylistInteractorTest {
             );
             interactor.execute(inputData);
             assertTrue(sentimentCalled[0]);
-            assertTrue(true);
         }
 
         @Test
@@ -147,7 +147,10 @@ class AnalyzePlaylistInteractorTest {
                     mockSentimentDAO,
                     mockPresenter,
                     mockPlaylistDAO,
-                    null
+                    new AnalysisStatsDataAccessObject("test_stats.json") {
+                        @Override
+                        public void incrementAnalyzedPlaylistsCount() { /* Do nothing */ }
+                    }
             );
             interactor.execute(inputData);
         }
@@ -197,12 +200,14 @@ class AnalyzePlaylistInteractorTest {
                     mockSentimentDAO,
                     mockPresenter,
                     mockPlaylistDAO,
-                    null
+                    new AnalysisStatsDataAccessObject("test_stats.json") {
+                        @Override
+                        public void incrementAnalyzedPlaylistsCount() { /* Do nothing */ }
+                    }
             );
             interactor.execute(inputData);
         }
 
-        // TODO: finish section 2 tests
         //Tests of Section2: get analysis from the lyrics
         @Test
         void analysisSuccessTest() {
@@ -309,5 +314,105 @@ class AnalyzePlaylistInteractorTest {
             interactor.execute(inputData);
         }
 
+        @Test
+        void ioExceptionTest() {
+            String playlist = "[" + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\"}" + "]";
+            JsonArray songs = JsonParser.parseString(playlist).getAsJsonArray();
+            AnalyzePlaylistInputData inputData = new AnalyzePlaylistInputData("id", "MyPlaylist", songs);
 
+            SpotifyPlaylistDataAccessInterface mockPlaylistDAO = new SpotifyPlaylistDataAccessInterface() {
+                @Override
+                public JsonArray getLyrics(JsonArray songs) {
+                    String songsInfo = "["
+                            + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\",\"lyrics\":\"Shine bright like a diamond\"}"
+                            + "]";
+                    return JsonParser.parseString(songsInfo).getAsJsonArray();
+                }
+                @Override
+                public String getStringLyrics(JsonArray songs) { return "Shine bright like a diamond\n"; }
+            };
+
+            SentimentDataAccessInterface mockSentimentDAO = new SentimentDataAccessInterface() {
+                @Override
+                public SentimentResult analyzeSentiment(String lyrics) throws IOException {
+                    throw new IOException("API limit reached");
+                }
+            };
+
+            AnalyzePlaylistOutputBoundary mockPresenter = new AnalyzePlaylistOutputBoundary() {
+                @Override
+                public void prepareSuccessView(AnalyzePlaylistOutputData data) {
+                    fail("Should not succeed");
+                }
+
+                @Override
+                public void prepareFailView(String error) {
+                    assertEquals("Failed to connect to the sentiment analysis service: API limit reached", error);
+                }
+            };
+
+            AnalyzePlaylistInteractor interactor = new AnalyzePlaylistInteractor(
+                    new PlaylistFactory(),
+                    new SentimentResultFactory(),
+                    mockSentimentDAO,
+                    mockPresenter,
+                    mockPlaylistDAO,
+                    new AnalysisStatsDataAccessObject("test_stats.json") {
+                        @Override
+                        public void incrementAnalyzedPlaylistsCount() { /* Do nothing */ }
+                    }
+            );
+            interactor.execute(inputData);
+        }
+
+        @Test
+        void generalExceptionTest() {
+            String playlist = "[" + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\"}" + "]";
+            JsonArray songs = JsonParser.parseString(playlist).getAsJsonArray();
+            AnalyzePlaylistInputData inputData = new AnalyzePlaylistInputData("id", "MyPlaylist", songs);
+
+            SpotifyPlaylistDataAccessInterface mockPlaylistDAO = new SpotifyPlaylistDataAccessInterface() {
+                @Override
+                public JsonArray getLyrics(JsonArray songs) {
+                    String songsInfo = "["
+                            + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\",\"lyrics\":\"Shine bright like a diamond\"}"
+                            + "]";
+                    return JsonParser.parseString(songsInfo).getAsJsonArray();
+                }
+                @Override
+                public String getStringLyrics(JsonArray songs) { return "Shine bright like a diamond\n"; }
+            };
+
+            SentimentDataAccessInterface mockSentimentDAO = new SentimentDataAccessInterface() {
+                @Override
+                public SentimentResult analyzeSentiment(String lyrics) {
+                    throw new RuntimeException("Unexpected error");
+                }
+            };
+
+            AnalyzePlaylistOutputBoundary mockPresenter = new AnalyzePlaylistOutputBoundary() {
+                @Override
+                public void prepareSuccessView(AnalyzePlaylistOutputData data) {
+                    fail("Should not succeed");
+                }
+
+                @Override
+                public void prepareFailView(String error) {
+                    assertEquals("An unexpected error occurred during analysis: Unexpected error", error);
+                }
+            };
+
+            AnalyzePlaylistInteractor interactor = new AnalyzePlaylistInteractor(
+                    new PlaylistFactory(),
+                    new SentimentResultFactory(),
+                    mockSentimentDAO,
+                    mockPresenter,
+                    mockPlaylistDAO,
+                    new AnalysisStatsDataAccessObject("test_stats.json") {
+                        @Override
+                        public void incrementAnalyzedPlaylistsCount() { /* Do nothing */ }
+                    }
+            );
+            interactor.execute(inputData);
+        }
     }

@@ -1,0 +1,69 @@
+@startuml
+!theme vibrant
+title Sequence Diagram: Analyze Playlist Use Case
+
+actor User
+
+participant LoggedInView
+participant AnalysisController
+participant AnalyzePlaylistInteractor
+participant "spotifyDAI:\nSpotifyPlaylistDataAccessInterface" as SpotifyDAI
+participant "sentimentDAI:\nSentimentDataAccessInterface" as SentimentDAI
+participant AnalysisPresenter
+participant AnalysisViewModel
+participant AnalysisView
+
+User -> LoggedInView: clicks "Analyze Selected" 
+
+activate LoggedInView
+LoggedInView -> AnalysisViewModel: getState()
+LoggedInView -> AnalysisViewModel: setState(loading=true)
+LoggedInView -> AnalysisViewModel: firePropertyChanged()
+activate AnalysisViewModel
+AnalysisViewModel -> AnalysisView: propertyChange(loading)
+deactivate AnalysisViewModel
+activate AnalysisView
+AnalysisView -> AnalysisView: updateViewFromState(loading)
+deactivate AnalysisView
+LoggedInView -> LoggedInView: create and show AnalysisView dialog
+note right of LoggedInView: SwingWorker.execute() starts background thread
+
+... 20 ms later ...
+
+== Background Thread ==
+LoggedInView -> AnalysisController: execute(playlist)
+deactivate LoggedInView
+
+activate AnalysisController
+AnalysisController -> AnalyzePlaylistInteractor: execute(inputData)
+deactivate AnalysisController
+
+activate AnalyzePlaylistInteractor
+AnalyzePlaylistInteractor -> SpotifyDAI: getLyrics(songs)
+activate SpotifyDAI
+SpotifyDAI --> AnalyzePlaylistInteractor: songInfo
+deactivate SpotifyDAI
+
+AnalyzePlaylistInteractor -> SentimentDAI: analyzeSentiment(lyrics)
+activate SentimentDAI
+SentimentDAI --> AnalyzePlaylistInteractor: result
+deactivate SentimentDAI
+
+AnalyzePlaylistInteractor -> AnalysisPresenter: prepareSuccessView(outputData)
+deactivate AnalyzePlaylistInteractor
+
+== Event Dispatch Thread (EDT) ==
+activate AnalysisPresenter
+note right of AnalysisPresenter: SwingUtilities.invokeLater()
+AnalysisPresenter -> AnalysisViewModel: getState()
+AnalysisPresenter -> AnalysisViewModel: setState(result)
+AnalysisPresenter -> AnalysisViewModel: firePropertyChanged()
+deactivate AnalysisPresenter
+activate AnalysisViewModel
+AnalysisViewModel -> AnalysisView: propertyChange(result)
+deactivate AnalysisViewModel
+activate AnalysisView
+AnalysisView -> AnalysisView: updateViewFromState(result)
+deactivate AnalysisView
+
+@enduml

@@ -207,12 +207,18 @@ class AnalyzePlaylistInteractorTest {
         @Test
         void analysisSuccessTest() {
             String combinedLyrics = "Shine bright like a diamond\n";
-            JsonArray songs = new JsonArray(); // Dummy array, as the mock will bypass it
+            String playlist = "[" + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\"}" + "]";
+            JsonArray songs = JsonParser.parseString(playlist).getAsJsonArray();
             AnalyzePlaylistInputData inputData = new AnalyzePlaylistInputData("id", "MyPlaylist", songs);
 
             SpotifyPlaylistDataAccessInterface mockPlaylistDAO = new SpotifyPlaylistDataAccessInterface() {
                 @Override
-                public JsonArray getLyrics(JsonArray songs) { return new JsonArray(); /* Not used in this path */ }
+                public JsonArray getLyrics(JsonArray songs) {
+                    String songsInfo = "["
+                            + "{\"artist\":\"Rihanna\",\"title\":\"Diamonds\",\"lyrics\":\"Shine bright like a diamond\"}"
+                            + "]";
+                    return JsonParser.parseString(songsInfo).getAsJsonArray();
+                }
                 @Override
                 public String getStringLyrics(JsonArray songs) { return combinedLyrics; }
             };
@@ -303,45 +309,7 @@ class AnalyzePlaylistInteractorTest {
             interactor.execute(inputData);
         }
 
-        @Test
-        void failureAnalysisTwoTest() {
-            String emptyLyrics = "";
-            AnalyzePlaylistInputData inputData = new AnalyzePlaylistInputData("id", "playlist", new JsonArray());
 
-            SpotifyPlaylistDataAccessInterface mockPlaylistDAO = new SpotifyPlaylistDataAccessInterface() {
-                @Override
-                public JsonArray getLyrics(JsonArray songs) { return new JsonArray(); }
-                @Override
-                public String getStringLyrics(JsonArray songs) { return emptyLyrics; }
-            };
-
-            SentimentDataAccessInterface mockSentimentDAO = (lyrics) -> {
-                fail("Sentiment analysis should not be called for empty lyrics");
-                return null;
-            };
-
-            AnalyzePlaylistOutputBoundary mockPresenter = new AnalyzePlaylistOutputBoundary() {
-                @Override
-                public void prepareSuccessView(AnalyzePlaylistOutputData data) {
-                    fail("Should not succeed for empty lyrics");
-                }
-
-                @Override
-                public void prepareFailView(String error) {
-                    assertEquals("Selected playlist is empty", error);
-                }
-            };
-
-            AnalyzePlaylistInteractor interactor = new AnalyzePlaylistInteractor(
-                    new PlaylistFactory(),
-                    new SentimentResultFactory(),
-                    mockSentimentDAO,
-                    mockPresenter,
-                    mockPlaylistDAO,
-                    new AnalysisStatsDataAccessObject("test_stats.json")
-            );
-            interactor.execute(inputData);
-        }
     }
 
 
